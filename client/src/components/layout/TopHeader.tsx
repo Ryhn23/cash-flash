@@ -11,8 +11,6 @@ export interface TopHeaderProps {
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   onOpenMobileSidebar,
-  reconciliationStatus = 'OK - Sama',
-  remainingPercentage = 100,
 }) => {
   const { activeGroup, activeTab, toggleActivityDrawer } = useAppStore();
 
@@ -56,46 +54,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Telemetry Status Badges */}
-      <div className="flex items-center gap-2.5">
-        {/* Reconciliation Pill */}
-        <div
-          className={clsx(
-            'hidden sm:inline-flex items-center h-6 px-2 text-[11px] font-semibold rounded border tabular-nums gap-1.5',
-            reconciliationStatus === 'OK - Sama'
-              ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]'
-              : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]'
-          )}
-          title="Status Rekonsiliasi Kas (Ledger vs Ringkasan)"
-        >
-          <i
-            className={clsx(
-              'text-[9px]',
-              reconciliationStatus === 'OK - Sama'
-                ? 'fa-solid fa-circle-check text-emerald-600'
-                : 'fa-solid fa-triangle-exclamation text-rose-600'
-            )}
-          />
-          <span>Rekonsiliasi: {reconciliationStatus}</span>
-        </div>
-
-        {/* Remaining Budget Pill */}
-        <div
-          className="hidden md:inline-flex items-center h-6 px-2 text-[11px] font-semibold rounded border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] tabular-nums gap-1.5"
-          title="Sisa Pagu Anggaran Workspace"
-        >
-          <span className="text-slate-400 font-sans text-[10px]">Sisa:</span>
-          <span className="font-mono font-bold text-[#1E1B4B]">{remainingPercentage}%</span>
-        </div>
-
-        {/* Activity feed quick launcher */}
+      {/* Right: Clean minimal action */}
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={toggleActivityDrawer}
-          className="h-8 px-2.5 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
-          title="Buka Riwayat Audit Trail"
+          className="h-8 px-2.5 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-slate-600 hover:text-slate-900 text-xs font-medium flex items-center gap-1.5 transition-colors"
+          title="Riwayat Aktivitas"
+          aria-label="Riwayat Aktivitas"
         >
-          <i className="fa-solid fa-clock-rotate-left text-xs text-slate-500" />
+          <i className="fa-solid fa-clock-rotate-left text-xs text-slate-400" />
           <span className="hidden sm:inline">Aktivitas</span>
         </button>
       </div>

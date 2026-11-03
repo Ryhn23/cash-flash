@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import type { AnalyticsKpis } from '../../types/index.js';
 import { formatRupiah } from '../../utils/format.js';
 import { useAppStore } from '../../store/useAppStore.js';
@@ -18,112 +17,97 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
     if (onFilterAnomalies) onFilterAnomalies();
   };
 
-  const cards = [
-    {
-      id: 'expense',
-      label: 'TOTAL PENGELUARAN',
-      value: formatRupiah(kpis.totalExpense),
-      subtext: `${kpis.totalTransactions} transaksi tercatat`,
-      icon: 'fa-solid fa-arrow-trend-down',
-      iconBg: 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]',
-      isNumeric: true,
-    },
-    {
-      id: 'income',
-      label: 'PAGU ANGGARAN',
-      value: formatRupiah(kpis.budgetEffective),
-      subtext: `Kas masuk ${formatRupiah(kpis.totalIncome)}`,
-      icon: 'fa-solid fa-wallet',
-      iconBg: 'bg-[#EEF2FF] text-[#1E1B4B] border-[#C7D2FE]',
-      isNumeric: true,
-    },
-    {
-      id: 'balance',
-      label: 'SISA ANGGARAN',
-      value: formatRupiah(kpis.remainingBalance),
-      subtext: `Sisa ${kpis.remainingPercentage}% pagu`,
-      icon: 'fa-solid fa-scale-balanced',
-      iconBg: kpis.remainingBalance >= 0 ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]' : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]',
-      isNumeric: true,
-    },
-    {
-      id: 'transactions',
-      label: 'JUMLAH TRANSAKSI',
-      value: kpis.totalTransactions.toString(),
-      subtext: 'Baris ledger aktif',
-      icon: 'fa-solid fa-receipt',
-      iconBg: 'bg-[#F8FAFC] text-[#475569] border-[#E2E8F0]',
-      isNumeric: true,
-    },
-    {
-      id: 'reconciliation',
-      label: 'REKONSILIASI KAS',
-      value: kpis.reconciliationStatus,
-      subtext: kpis.reconciliationStatus === 'OK - Sama' ? 'Selisih Rp 0' : `Selisih ${formatRupiah(Math.abs(kpis.sumFromLedger - kpis.sumFromCategoryBreakdown))}`,
-      icon: kpis.reconciliationStatus === 'OK - Sama' ? 'fa-solid fa-circle-check' : 'fa-solid fa-triangle-exclamation',
-      iconBg: kpis.reconciliationStatus === 'OK - Sama' ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]' : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]',
-      isBadge: true,
-    },
-    {
-      id: 'anomalies',
-      label: 'PERLU VERIFIKASI',
-      value: `${kpis.needsReviewCount} Baris`,
-      subtext: kpis.needsReviewCount > 0 ? 'Tinjau anomali' : 'Semua bersih',
-      icon: 'fa-solid fa-magnifying-glass-chart',
-      iconBg: kpis.needsReviewCount > 0 ? 'bg-[#FFFBEB] text-[#92400E] border-[#FDE68A]' : 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]',
-      clickable: kpis.needsReviewCount > 0,
-      onClick: handleAnomalyClick,
-    },
-  ];
+  const isReconciled = kpis.reconciliationStatus === 'OK - Sama';
+  const hasAnomalies = kpis.needsReviewCount > 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {cards.map((card, idx) => (
-        <motion.div
-          key={card.id}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.12, delay: idx * 0.02 }}
-          onClick={card.onClick}
-          className={clsx(
-            'bg-white border border-[#E2E8F0] rounded-lg p-3.5 no-gradient transition-all',
-            card.clickable ? 'cursor-pointer hover:border-amber-400 hover:bg-[#FFFBEB]/10 group' : 'hover:border-slate-300'
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <span className="label-sm">
-              {card.label}
-            </span>
-            <div
-              className={clsx(
-                'w-6 h-6 rounded flex items-center justify-center text-xs border no-gradient',
-                card.iconBg
-              )}
-            >
-              <i className={clsx(card.icon, 'text-[11px]')} />
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+      {/* 1. Belanja & Transaksi */}
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient">
+        <div>
+          <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
+            TOTAL PENGELUARAN
+          </span>
+          <div className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-[#0F172A] mt-1">
+            {formatRupiah(kpis.totalExpense)}
           </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-sans">JUMLAH TRANSAKSI</span>
+          <span className="font-mono font-semibold text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+            {kpis.totalTransactions} transaksi
+          </span>
+        </div>
+      </div>
 
-          <div className="mt-2">
-            <div
+      {/* 2. Pagu & Sisa Anggaran */}
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient">
+        <div>
+          <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
+            PAGU ANGGARAN
+          </span>
+          <div className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-[#1E1B4B] mt-1">
+            {formatRupiah(kpis.budgetEffective)}
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-sans">SISA ANGGARAN</span>
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className={clsx('font-bold', kpis.remainingBalance >= 0 ? 'text-[#15803D]' : 'text-[#BE123C]')}>
+              {formatRupiah(kpis.remainingBalance)}
+            </span>
+            <span className="text-[10px] text-slate-400">({kpis.remainingPercentage}%)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Kesehatan Kas & Anomali */}
+      <div
+        onClick={hasAnomalies ? handleAnomalyClick : undefined}
+        className={clsx(
+          'bg-white border rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient transition-all',
+          hasAnomalies
+            ? 'border-amber-300 hover:border-amber-400 cursor-pointer bg-amber-50/20'
+            : 'border-[#E2E8F0]'
+        )}
+      >
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
+              REKONSILIASI KAS
+            </span>
+            <span
               className={clsx(
-                'text-lg sm:text-xl font-bold tracking-tight text-[#0F172A]',
-                card.isNumeric && 'tabular-data font-mono',
-                card.id === 'reconciliation' && (kpis.reconciliationStatus === 'OK - Sama' ? 'text-[#15803D]' : 'text-[#BE123C]'),
-                card.id === 'anomalies' && kpis.needsReviewCount > 0 && 'text-[#92400E]'
+                'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border',
+                isReconciled
+                  ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]'
+                  : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]'
               )}
             >
-              {card.value}
-            </div>
-            <div className="flex items-center justify-between text-xs text-[#64748B] mt-1 font-sans">
-              <span>{card.subtext}</span>
-              {card.clickable && (
-                <i className="fa-solid fa-arrow-right text-[10px] text-amber-600 group-hover:translate-x-0.5 transition-transform" />
-              )}
-            </div>
+              <i className={clsx('text-[9px]', isReconciled ? 'fa-solid fa-circle-check' : 'fa-solid fa-triangle-exclamation')} />
+              <span>{kpis.reconciliationStatus}</span>
+            </span>
           </div>
-        </motion.div>
-      ))}
+          <div className="text-sm font-medium text-slate-600 mt-2 font-sans">
+            {isReconciled ? 'Ledger dan rincian seimbang (Rp 0 selisih)' : 'Ada selisih pada ledger kas'}
+          </div>
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-sans">PERLU VERIFIKASI</span>
+          {hasAnomalies ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300">
+              <i className="fa-solid fa-magnifying-glass text-[10px]" />
+              <span>{kpis.needsReviewCount} Baris &bull; Tinjau</span>
+            </span>
+          ) : (
+            <span className="text-[#15803D] font-medium flex items-center gap-1">
+              <i className="fa-solid fa-check text-[10px]" />
+              <span>Semua Bersih</span>
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

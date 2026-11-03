@@ -5,7 +5,6 @@ import { useAppStore } from '../store/useAppStore.js';
 import type { AnalyticsReport } from '../types/index.js';
 import { KpiCards } from '../components/dashboard/KpiCards.js';
 import { CategoryBreakdownTable } from '../components/dashboard/CategoryBreakdownTable.js';
-import { SpendCharts } from '../components/dashboard/SpendCharts.js';
 import { Button } from '../components/ui/Button.js';
 import { formatRupiah } from '../utils/format.js';
 
@@ -39,19 +38,17 @@ export const DashboardPage: React.FC = () => {
 
   const kpis = data?.kpis;
   const categories = data?.categoryBreakdown || [];
-  const timeline = data?.timeline || [];
-  const topExpenses = data?.topExpenses || [];
 
   return (
-    <div className="space-y-5">
-      {/* Sleek Minimal Header Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-1">
+    <div className="space-y-4">
+      {/* Header Toolbar */}
+      <div className="flex items-center justify-between pb-1">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-[#0F172A] tracking-tight font-heading">
             Ringkasan Keuangan
           </h2>
-          <span className="text-xs text-slate-500 font-mono">
-            {activeGroup.name} &bull; Ledger Real-Time
+          <span className="text-xs text-slate-400 font-mono">
+            {activeGroup.name}
           </span>
         </div>
 
@@ -94,14 +91,11 @@ export const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* 1. Executive Summary: KPI Cards */}
+      {/* 1. Executive Summary: Minimalist KPI Cards */}
       {kpis && <KpiCards kpis={kpis} onFilterAnomalies={() => setActiveTab('ledger')} />}
 
       {/* 2. Breakdown Pengeluaran per Kategori */}
       {kpis && <CategoryBreakdownTable categories={categories} totalExpense={kpis.totalExpense} />}
-
-      {/* 3. Grafik Tren & Top Pengeluaran Terbesar */}
-      <SpendCharts categories={categories} timeline={timeline} topExpenses={topExpenses} />
     </div>
   );
 };

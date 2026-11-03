@@ -54,6 +54,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'txDate', desc: true }]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -318,8 +319,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Top Action Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* Top Header */}
+      <div className="flex items-center justify-between pb-1">
         <div className="flex items-center gap-2.5">
           <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight font-heading">
             Buku Kas Belanja
@@ -328,8 +329,125 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             {filteredData.length} Baris
           </span>
         </div>
+      </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+      {/* Unified Compact Action Bar */}
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-none no-gradient">
+        {/* Left: Search input & Quick Segment Tabs */}
+        <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          {/* Keyword Search */}
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i className="fa-solid fa-magnifying-glass text-xs" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari uraian, kategori, catatan..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-9 px-3 pl-8.5 rounded-lg border border-[#E2E8F0] bg-slate-50/50 text-xs font-sans text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#1E1B4B] focus:bg-white transition-colors"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600"
+              >
+                <i className="fa-solid fa-xmark text-xs" />
+              </button>
+            )}
+          </div>
+
+          {/* Quick Segment Tabs */}
+          <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100/80 border border-slate-200/60 text-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedType('ALL');
+                setSelectedStatus('ALL');
+              }}
+              className={clsx(
+                'px-2.5 py-1 rounded-md font-medium text-xs transition-all',
+                selectedType === 'ALL' && selectedStatus === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              Semua
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedType('EXPENSE');
+                setSelectedStatus('ALL');
+              }}
+              className={clsx(
+                'px-2.5 py-1 rounded-md font-medium text-xs transition-all',
+                selectedType === 'EXPENSE'
+                  ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              Pengeluaran
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedType('INCOME');
+                setSelectedStatus('ALL');
+              }}
+              className={clsx(
+                'px-2.5 py-1 rounded-md font-medium text-xs transition-all',
+                selectedType === 'INCOME'
+                  ? 'bg-white text-slate-900 shadow-sm font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              Pemasukan
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedStatus(selectedStatus === 'ANOMALIES' ? 'ALL' : 'ANOMALIES');
+              }}
+              className={clsx(
+                'px-2.5 py-1 rounded-md font-medium text-xs flex items-center gap-1.5 transition-all',
+                selectedStatus === 'ANOMALIES'
+                  ? 'bg-amber-100 text-amber-900 font-bold border border-amber-300'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              <span>Perlu Cek</span>
+              {anomalyCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {anomalyCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Toggle Filter Lanjutan */}
+          <button
+            type="button"
+            onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+            className={clsx(
+              'h-9 px-2.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0',
+              showAdvancedFilter || selectedCategory !== 'ALL' || startDate || endDate
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-900 font-semibold'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            )}
+            title="Filter Tanggal dan Kategori"
+          >
+            <i className="fa-solid fa-filter text-[11px]" />
+            <span className="hidden sm:inline">Filter</span>
+            {(selectedCategory !== 'ALL' || startDate || endDate) && (
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+            )}
+          </button>
+        </div>
+
+        {/* Right: Quick Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
           {canEdit && (
             <Button
               variant="primary"
@@ -364,101 +482,48 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg p-3.5 space-y-3 no-gradient shadow-none">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-          {/* Keyword Search */}
-          <div className="relative sm:col-span-2">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <i className="fa-solid fa-magnifying-glass text-xs" />
-            </div>
-            <input
-              type="text"
-              placeholder="Cari uraian, kategori, catatan..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-[38px] px-3 pl-9 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/10"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+      {/* Collapsible Advanced Filters (Only displayed on demand) */}
+      {showAdvancedFilter && (
+        <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Category Dropdown */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500 font-medium">Kategori:</span>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="h-8 px-2.5 rounded-md border border-slate-200 bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#1E1B4B]"
               >
-                <i className="fa-solid fa-xmark text-xs" />
-              </button>
-            )}
+                <option value="ALL">Semua Kategori</option>
+                <option value="UNCATEGORIZED">-- Belum dikategorikan --</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Date Range Picker */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500 font-medium">Periode:</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-8 px-2 rounded-md border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:border-[#1E1B4B]"
+              />
+              <span className="text-slate-400">s/d</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="h-8 px-2 rounded-md border border-slate-200 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:border-[#1E1B4B]"
+              />
+            </div>
           </div>
 
-          {/* Filter Category */}
-          <div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full h-[38px] px-2.5 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/10"
-            >
-              <option value="ALL">Semua Kategori</option>
-              <option value="UNCATEGORIZED">-- Belum dikategorikan --</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filter Status */}
-          <div>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className={clsx(
-                'w-full h-[38px] px-2.5 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/10',
-                selectedStatus === 'ANOMALIES' && 'bg-[#FFFBEB] text-[#92400E] border-[#FDE68A] font-bold'
-              )}
-            >
-              <option value="ALL">Semua Status Cek</option>
-              <option value="ANOMALIES">Perlu Cek ({anomalyCount})</option>
-              <option value="POTENTIAL_DUPLICATE">Mungkin Dobel</option>
-              <option value="INCOMPLETE">Belum Lengkap</option>
-              <option value="VERIFIED_DUPLICATE_OK">Terverifikasi (Bukan Dobel)</option>
-              <option value="OK">OK</option>
-            </select>
-          </div>
-
-          {/* Filter Type */}
-          <div>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full h-[38px] px-2.5 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/10"
-            >
-              <option value="ALL">Semua Tipe</option>
-              <option value="EXPENSE">Pengeluaran (Outflow)</option>
-              <option value="INCOME">Pemasukan (Inflow)</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Date Filter & Active Filters Reset */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-[#F1F5F9] text-xs font-sans">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-slate-500 font-medium">Rentang Tanggal:</span>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="h-[32px] px-2 rounded border border-[#E2E8F0] bg-white text-xs font-mono text-slate-800 focus:outline-none focus:border-[#3730A3]"
-            />
-            <span className="text-slate-400">s/d</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="h-[32px] px-2 rounded border border-[#E2E8F0] bg-white text-xs font-mono text-slate-800 focus:outline-none focus:border-[#3730A3]"
-            />
-          </div>
-
+          {/* Reset Action */}
           {(search || selectedCategory !== 'ALL' || selectedStatus !== 'ALL' || selectedType !== 'ALL' || startDate || endDate) && (
             <button
               type="button"
@@ -470,14 +535,14 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                 setStartDate('');
                 setEndDate('');
               }}
-              className="text-[#3730A3] hover:underline font-semibold flex items-center gap-1 active:scale-[0.99]"
+              className="text-indigo-700 hover:underline font-semibold flex items-center gap-1"
             >
               <i className="fa-solid fa-rotate-left text-[10px]" />
-              <span>Reset Semua Filter</span>
+              <span>Reset Filter</span>
             </button>
           )}
         </div>
-      </div>
+      )}
 
       {/* Spreadsheet Data Grid */}
       <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden shadow-none no-gradient">
