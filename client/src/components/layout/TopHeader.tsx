@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppStore } from '../../store/useAppStore.js';
-import { Badge } from '../ui/Badge.js';
+import { Button } from '../ui/Button.js';
 import clsx from 'clsx';
 
 export interface TopHeaderProps {
@@ -42,30 +42,33 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           <i className="fa-solid fa-bars text-sm" />
         </button>
 
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-sm sm:text-base font-bold text-[#0F172A] tracking-tight font-heading">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm sm:text-base font-semibold text-slate-900 tracking-tight font-heading">
             {getTabTitle()}
           </h1>
           {activeGroup && (
-            <span className="inline-flex items-center h-5 px-2 text-[10px] font-semibold rounded bg-[#F1F5F9] text-slate-700 border border-[#E2E8F0]">
-              {activeGroup.name}
-            </span>
+            <>
+              <span className="text-slate-300 text-xs select-none">/</span>
+              <span className="text-xs font-normal text-slate-500">
+                {activeGroup.name}
+              </span>
+            </>
           )}
         </div>
       </div>
 
       {/* Right: Clean minimal action */}
       <div className="flex items-center gap-2">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={toggleActivityDrawer}
-          className="h-8 px-2.5 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-slate-600 hover:text-slate-900 text-xs font-medium flex items-center gap-1.5 transition-colors"
           title="Riwayat Aktivitas"
           aria-label="Riwayat Aktivitas"
+          icon="fa-solid fa-clock-rotate-left"
         >
-          <i className="fa-solid fa-clock-rotate-left text-xs text-slate-400" />
           <span className="hidden sm:inline">Aktivitas</span>
-        </button>
+        </Button>
       </div>
     </header>
   );

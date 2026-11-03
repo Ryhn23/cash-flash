@@ -35,15 +35,15 @@ export const Button: React.FC<ButtonProps> = ({
   // Ghost / Utility: transparent, label #64748B, hover #0F172A & #F1F5F9
   const variantClasses = {
     primary:
-      'bg-[#1E1B4B] text-white border border-[#1E1B4B] hover:bg-[#3730A3] hover:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/20',
+      'bg-[#1E1B4B] text-white border border-[#1E1B4B] hover:bg-[#3730A3] hover:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/20 shadow-none',
     secondary:
-      'bg-white text-[#1E293B] border border-[#E2E8F0] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] focus:ring-2 focus:ring-slate-200',
+      'bg-white text-slate-700 border border-[#CBD5E1] hover:bg-[#F8FAFC] hover:border-slate-400 hover:text-slate-900 focus:ring-2 focus:ring-slate-200 shadow-none',
     danger:
-      'bg-[#BE123C] text-white border border-[#BE123C] hover:bg-[#9F1239] hover:border-[#9F1239] focus:ring-2 focus:ring-rose-200',
+      'bg-[#BE123C] text-white border border-[#BE123C] hover:bg-[#9F1239] hover:border-[#9F1239] focus:ring-2 focus:ring-rose-200 shadow-none',
     outline:
-      'bg-white text-[#1E293B] border border-[#E2E8F0] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] focus:ring-2 focus:ring-slate-200',
+      'bg-white text-slate-700 border border-[#CBD5E1] hover:bg-[#F8FAFC] hover:border-slate-400 hover:text-slate-900 focus:ring-2 focus:ring-slate-200 shadow-none',
     ghost:
-      'bg-transparent text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]',
+      'bg-transparent text-slate-600 hover:bg-[#F1F5F9] hover:text-[#0F172A] border border-transparent shadow-none',
   }[variant];
 
   return (

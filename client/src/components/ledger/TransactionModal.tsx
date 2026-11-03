@@ -169,20 +169,19 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? 'Ubah Transaksi Belanja' : 'Tambah Transaksi Belanja Baru'}
-      description="Gunakan kalkulator dua arah (perkalian satuan biasa atau reverse split total nota)"
-      maxWidth="2xl"
+      title={isEditing ? 'Ubah Transaksi' : 'Tambah Transaksi'}
+      maxWidth="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center gap-2">
+          <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
             <i className="fa-solid fa-triangle-exclamation" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Row 1: Tanggal & Tipe Transaksi */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             label="Tanggal Transaksi"
             type="date"
@@ -200,7 +199,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 type="button"
                 onClick={() => setType('EXPENSE')}
                 className={clsx(
-                  'py-2 px-3 text-xs font-semibold rounded border flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99]',
+                  'h-[38px] px-3 text-xs font-semibold rounded border flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99]',
                   type === 'EXPENSE'
                     ? 'bg-[#FFF1F2] border-[#FFE4E6] text-[#BE123C] font-bold'
                     : 'bg-white border-[#E2E8F0] text-slate-600 hover:bg-[#F8FAFC]'
@@ -213,7 +212,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 type="button"
                 onClick={() => setType('INCOME')}
                 className={clsx(
-                  'py-2 px-3 text-xs font-semibold rounded border flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99]',
+                  'h-[38px] px-3 text-xs font-semibold rounded border flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99]',
                   type === 'INCOME'
                     ? 'bg-[#F0FDF4] border-[#DCFCE7] text-[#15803D] font-bold'
                     : 'bg-white border-[#E2E8F0] text-slate-600 hover:bg-[#F8FAFC]'
@@ -229,7 +228,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         {/* Row 2: Uraian Deskripsi */}
         <Input
           label="Uraian / Deskripsi Belanja"
-          placeholder="Contoh: Sewa Penginapan Safir 5 Hari, Token Listrik Mess..."
+          placeholder="Contoh: Sewa Penginapan Safir, Kertas HVS A4..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
@@ -250,53 +249,40 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </option>
             ))}
           </Select>
-          {!categoryId && (
-            <p className="text-[11px] text-amber-700 mt-1 flex items-center gap-1">
-              <i className="fa-solid fa-circle-info" />
-              <span>Jika tidak dipilih, akan masuk ke pos "Belum dikategorikan" dan ditandai perlu dicek.</span>
-            </p>
-          )}
         </div>
 
-        {/* Dual-Direction Calculation Mode Selector Banner */}
-        <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5 font-heading">
-              <i className="fa-solid fa-calculator text-[#1E1B4B]" />
-              <span>Metode Perhitungan Harga:</span>
-            </span>
-            <div className="flex items-center gap-1 bg-white p-0.5 border border-[#E2E8F0] rounded">
-              <button
-                type="button"
-                onClick={() => handleModeSwitch('FORWARD')}
-                className={clsx(
-                  'px-2 py-1 text-[11px] font-semibold rounded transition-colors active:scale-[0.99]',
-                  calcMode === 'FORWARD'
-                    ? 'bg-[#1E1B4B] text-white shadow-none'
-                    : 'text-slate-600 hover:text-slate-900'
-                )}
-              >
-                Mode A: Qty &times; Satuan
-              </button>
-              <button
-                type="button"
-                onClick={() => handleModeSwitch('REVERSE')}
-                className={clsx(
-                  'px-2 py-1 text-[11px] font-semibold rounded transition-colors active:scale-[0.99]',
-                  calcMode === 'REVERSE'
-                    ? 'bg-[#1E1B4B] text-white shadow-none'
-                    : 'text-slate-600 hover:text-slate-900'
-                )}
-              >
-                Mode B: Split dari Total Nota
-              </button>
-            </div>
+        {/* Dual-Direction Calculation Mode Selector */}
+        <div className="flex items-center justify-between p-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg">
+          <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 font-heading">
+            <i className="fa-solid fa-calculator text-[#1E1B4B]" />
+            <span>Metode Perhitungan:</span>
+          </span>
+          <div className="flex items-center gap-1 bg-white p-0.5 border border-[#CBD5E1] rounded">
+            <button
+              type="button"
+              onClick={() => handleModeSwitch('FORWARD')}
+              className={clsx(
+                'px-2 py-0.5 text-[11px] font-medium rounded transition-colors active:scale-[0.99]',
+                calcMode === 'FORWARD'
+                  ? 'bg-[#1E1B4B] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              Mode A: Qty &times; Satuan
+            </button>
+            <button
+              type="button"
+              onClick={() => handleModeSwitch('REVERSE')}
+              className={clsx(
+                'px-2 py-0.5 text-[11px] font-medium rounded transition-colors active:scale-[0.99]',
+                calcMode === 'REVERSE'
+                  ? 'bg-[#1E1B4B] text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              )}
+            >
+              Mode B: Split dari Total Nota
+            </button>
           </div>
-          <p className="text-[11px] text-slate-500 font-sans">
-            {calcMode === 'FORWARD'
-              ? 'Input Jumlah & Harga Satuan -> Total dihitung otomatis (dibulatkan).'
-              : 'Input Jumlah & Total Nota -> Harga Satuan dihitung otomatis (mendukung harga pecahan seperti Rp 178.480 / 3 unit).'}
-          </p>
         </div>
 
         {/* Row 4: Jumlah, Satuan, Harga Satuan, Total Harga */}
@@ -408,12 +394,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         {/* Row 5: Catatan / Keterangan */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Catatan / Keterangan Tambahan
+            Catatan Tambahan
           </label>
           <textarea
             rows={2}
             className="w-full input-base"
-            placeholder="Nomor nota, nomor meteran PLN, spesifikasi item, atau catatan staf..."
+            placeholder="Nomor nota, spesifikasi item, atau catatan tambahan..."
             value={verificationNote}
             onChange={(e) => setVerificationNote(e.target.value)}
           />

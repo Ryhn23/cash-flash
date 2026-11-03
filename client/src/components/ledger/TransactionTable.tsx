@@ -419,8 +419,8 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             >
               <span>Perlu Cek</span>
               {anomalyCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">
-                  {anomalyCount}
+                <span className="font-mono text-[11px] text-amber-700 font-semibold">
+                  ({anomalyCount})
                 </span>
               )}
             </button>
@@ -446,18 +446,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           </button>
         </div>
 
-        {/* Right: Quick Action Buttons */}
+        {/* Right: Standardized Functional Action Buttons */}
         <div className="flex items-center gap-2 shrink-0">
-          {canEdit && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onAddTransaction}
-              icon="fa-solid fa-plus"
-            >
-              Tambah Transaksi
-            </Button>
-          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onExportExcel}
+            icon="fa-solid fa-file-excel"
+          >
+            Export .xlsx (Safir)
+          </Button>
 
           {canEdit && (
             <Button
@@ -470,15 +468,16 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             </Button>
           )}
 
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onExportExcel}
-            icon="fa-solid fa-file-excel"
-            className="text-emerald-800 hover:bg-emerald-50 border-emerald-200"
-          >
-            Export .xlsx (Safir)
-          </Button>
+          {canEdit && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onAddTransaction}
+              icon="fa-solid fa-plus"
+            >
+              Tambah Transaksi
+            </Button>
+          )}
         </div>
       </div>
 
@@ -545,7 +544,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
       )}
 
       {/* Spreadsheet Data Grid */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>

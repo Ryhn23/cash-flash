@@ -107,13 +107,12 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Impor Buku Kas dari Excel (.xlsx / .csv)"
-      description="Unggah file spreadsheet belanja Safir. Sistem akan melakukan dry-run validasi otomatis sebelum memasukkan data ke database."
-      maxWidth="4xl"
+      title="Impor Data Excel"
+      maxWidth="2xl"
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center gap-2">
+          <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
             <i className="fa-solid fa-triangle-exclamation" />
             <span>{error}</span>
           </div>
@@ -125,7 +124,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
             className={clsx(
-              'border-2 border-dashed rounded-lg p-8 text-center transition-colors no-gradient shadow-none',
+              'border-2 border-dashed rounded-lg p-5 text-center transition-colors no-gradient shadow-none',
               file ? 'border-[#3730A3] bg-[#EEF2FF]/30' : 'border-[#CBD5E1] hover:border-[#3730A3] bg-[#F8FAFC]'
             )}
           >
@@ -137,17 +136,17 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
               className="hidden"
             />
 
-            <div className="w-12 h-12 rounded bg-[#1E1B4B] text-white flex items-center justify-center mx-auto mb-3 shadow-none no-gradient">
-              <i className="fa-solid fa-file-excel text-xl" />
+            <div className="w-9 h-9 rounded bg-[#1E1B4B] text-white flex items-center justify-center mx-auto mb-2.5 shadow-none no-gradient">
+              <i className="fa-solid fa-file-excel text-base" />
             </div>
 
             {file ? (
-              <div className="space-y-2">
-                <div className="text-sm font-bold text-slate-900 font-heading">{file.name}</div>
-                <div className="text-xs text-slate-500 font-mono">
-                  Ukuran: {(file.size / 1024).toFixed(1)} KB &bull; Siap dianalisis
+              <div className="space-y-1.5">
+                <div className="text-xs font-bold text-slate-900 font-heading">{file.name}</div>
+                <div className="text-[11px] text-slate-500 font-mono">
+                  {(file.size / 1024).toFixed(1)} KB &bull; Siap divalidasi
                 </div>
-                <div className="flex items-center justify-center gap-2 pt-2">
+                <div className="flex items-center justify-center gap-2 pt-1.5">
                   <Button variant="secondary" size="sm" onClick={reset}>
                     Pilih Berkas Lain
                   </Button>
@@ -158,19 +157,19 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     isLoading={isPreviewing}
                     icon="fa-solid fa-magnifying-glass"
                   >
-                    Mulai Uji Validasi (Dry-Run)
+                    Uji Validasi (Dry-Run)
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="text-sm font-bold text-slate-900 font-heading">
-                  Tarik dan lepas berkas Excel ke sini
+              <div className="space-y-1.5">
+                <div className="text-xs font-bold text-slate-900 font-heading">
+                  Pilih atau tarik berkas Excel ke sini
                 </div>
-                <p className="text-xs text-slate-500 font-sans">
-                  Format .xlsx, .xls, atau .csv (Maksimum 5MB)
+                <p className="text-[11px] text-slate-400 font-sans">
+                  Mendukung .xlsx, .xls, .csv (maksimal 5MB)
                 </p>
-                <div className="pt-2">
+                <div className="pt-1.5">
                   <Button
                     type="button"
                     variant="secondary"
@@ -185,36 +184,36 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
           </div>
         ) : (
           /* Step 2: Dry-run Validation Report */
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div className="p-3 bg-white border border-[#E2E8F0] rounded-lg text-center shadow-none">
-                <div className="text-[11px] text-slate-500 font-semibold tracking-wider uppercase font-sans">Total Baris</div>
-                <div className="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="p-2 bg-white border border-[#E2E8F0] rounded text-center shadow-none">
+                <div className="text-[10px] text-slate-500 font-semibold uppercase font-sans">Total Baris</div>
+                <div className="text-base font-bold font-mono text-slate-900 tabular-nums">
                   {report.totalRows}
                 </div>
               </div>
-              <div className="p-3 bg-[#F0FDF4] border border-[#DCFCE7] rounded-lg text-center shadow-none">
-                <div className="text-[11px] text-[#15803D] font-semibold tracking-wider uppercase font-sans">Valid Siap Impor</div>
-                <div className="text-xl font-bold font-mono text-[#15803D] mt-1 tabular-nums">
+              <div className="p-2 bg-[#F0FDF4] border border-[#DCFCE7] rounded text-center shadow-none">
+                <div className="text-[10px] text-[#15803D] font-semibold uppercase font-sans">Valid</div>
+                <div className="text-base font-bold font-mono text-[#15803D] tabular-nums">
                   {report.validCount}
                 </div>
               </div>
-              <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-lg text-center shadow-none">
-                <div className="text-[11px] text-[#92400E] font-semibold tracking-wider uppercase font-sans">Mungkin Dobel</div>
-                <div className="text-xl font-bold font-mono text-[#92400E] mt-1 tabular-nums">
+              <div className="p-2 bg-[#FFFBEB] border border-[#FDE68A] rounded text-center shadow-none">
+                <div className="text-[10px] text-[#92400E] font-semibold uppercase font-sans">Mungkin Dobel</div>
+                <div className="text-base font-bold font-mono text-[#92400E] tabular-nums">
                   {report.duplicateCount}
                 </div>
               </div>
-              <div className="p-3 bg-[#FFF1F2] border border-[#FFE4E6] rounded-lg text-center shadow-none">
-                <div className="text-[11px] text-[#BE123C] font-semibold tracking-wider uppercase font-sans">Data Tidak Lengkap</div>
-                <div className="text-xl font-bold font-mono text-[#BE123C] mt-1 tabular-nums">
+              <div className="p-2 bg-[#FFF1F2] border border-[#FFE4E6] rounded text-center shadow-none">
+                <div className="text-[10px] text-[#BE123C] font-semibold uppercase font-sans">Tidak Lengkap</div>
+                <div className="text-base font-bold font-mono text-[#BE123C] tabular-nums">
                   {report.incompleteCount}
                 </div>
               </div>
             </div>
 
             {/* Dry-Run Row Table Preview */}
-            <div className="border border-[#E2E8F0] rounded-lg overflow-hidden max-h-72 overflow-y-auto bg-white shadow-none">
+            <div className="border border-[#E2E8F0] rounded overflow-hidden max-h-60 overflow-y-auto bg-white shadow-none">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="sticky top-0 bg-[#FAFAFA] border-b border-[#E2E8F0] text-slate-500 font-semibold font-sans tracking-[0.04em] uppercase text-[11px]">
                   <tr className="h-10">

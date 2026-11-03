@@ -15,13 +15,13 @@ export const CategoryBreakdownTable: React.FC<CategoryBreakdownTableProps> = ({
   const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden no-gradient">
-      <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
+    <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
+      <div className="px-5 py-3.5 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
         <h3 className="text-sm font-semibold text-[#0F172A] tracking-tight font-heading">
           Pengeluaran per Kategori
         </h3>
-        <span className="text-[10px] font-semibold text-slate-600 bg-[#F1F5F9] px-2 py-0.5 rounded border border-[#E2E8F0] font-mono">
-          {categories.length} Kategori
+        <span className="text-xs text-slate-500 font-mono">
+          {categories.length} kategori
         </span>
       </div>
 
@@ -63,8 +63,8 @@ export const CategoryBreakdownTable: React.FC<CategoryBreakdownTableProps> = ({
                         {cat.name}
                       </span>
                       {isUncategorized && cat.count > 0 && (
-                        <span className="h-4 px-1.5 text-[9px] font-bold rounded-full bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A] inline-flex items-center">
-                          Perlu Cek
+                        <span className="text-[11px] text-amber-700 font-medium ml-1">
+                          (Perlu Cek)
                         </span>
                       )}
                     </div>

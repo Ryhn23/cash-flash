@@ -168,7 +168,7 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
   return (
     <div className="space-y-6">
       {/* 1. Group General Settings */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="border-b border-[#E2E8F0] pb-2.5 mb-4">
           <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Pengaturan Grup & Pagu</h3>
         </div>
@@ -216,19 +216,21 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
           </div>
 
           {canManage && (
-            <Button type="submit" variant="primary" isLoading={isSavingGroup}>
-              Simpan Perubahan
-            </Button>
+            <div className="flex justify-end pt-2">
+              <Button type="submit" variant="primary" size="sm" isLoading={isSavingGroup}>
+                Simpan Perubahan
+              </Button>
+            </div>
           )}
         </form>
       </div>
 
       {/* 2. Group Categories Management */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="border-b border-[#E2E8F0] pb-2.5 mb-4 flex items-center justify-between">
           <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Kategori Belanja</h3>
-          <span className="inline-flex items-center h-5 px-2 text-[10px] font-semibold text-slate-600 bg-slate-100 rounded font-mono border border-[#E2E8F0]">
-            {categories.length} Kategori
+          <span className="text-xs text-slate-500 font-mono">
+            {categories.length} kategori
           </span>
         </div>
 
@@ -277,7 +279,7 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
       </div>
 
       {/* 3. Group Units Management */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="border-b border-[#E2E8F0] pb-2.5 mb-4">
           <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Satuan Item</h3>
         </div>
@@ -299,7 +301,7 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
 
         <div className="flex flex-wrap gap-2">
           {units.map((u) => (
-            <span key={u} className="px-2.5 py-1 bg-[#F8FAFC] text-slate-800 text-xs font-mono font-medium rounded border border-[#E2E8F0]">
+            <span key={u} className="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-xs font-mono rounded">
               {u}
             </span>
           ))}
@@ -307,7 +309,7 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
       </div>
 
       {/* 4. Group Members Management */}
-      <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="border-b border-[#E2E8F0] pb-2.5 mb-4 flex items-center justify-between">
           <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Anggota Tim & Peran</h3>
           {canManage && (
@@ -372,24 +374,23 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
       <Modal
         isOpen={isAddMemberOpen}
         onClose={() => setIsAddMemberOpen(false)}
-        title="Tambahkan Anggota ke Grup Keuangan"
-        description="Pilih akun pengguna dan tetapkan peran kolaboratif."
-        maxWidth="md"
+        title="Tambah Anggota"
+        maxWidth="sm"
       >
-        <form onSubmit={handleAddMember} className="space-y-4">
+        <form onSubmit={handleAddMember} className="space-y-3">
           {memberError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
               <i className="fa-solid fa-triangle-exclamation" />
               <span>{memberError}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-sans">
-              Pilih Pengguna <span className="text-rose-600">*</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
+              Pengguna <span className="text-rose-600">*</span>
             </label>
             <select
-              className="w-full h-[38px] px-2.5 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3]"
+              className="w-full h-[38px] px-2.5 rounded border border-[#CBD5E1] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3]"
               value={selectedUserId}
               onChange={(e) => setSelectedUserId(e.target.value)}
               required
@@ -404,22 +405,22 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-sans">
-              Peran di Grup Ini <span className="text-rose-600">*</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
+              Peran Grup <span className="text-rose-600">*</span>
             </label>
             <select
-              className="w-full h-[38px] px-2.5 rounded border border-[#E2E8F0] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3]"
+              className="w-full h-[38px] px-2.5 rounded border border-[#CBD5E1] bg-white text-xs font-sans text-slate-800 focus:outline-none focus:border-[#3730A3]"
               value={selectedGroupRole}
               onChange={(e) => setSelectedGroupRole(e.target.value as any)}
               required
             >
-              <option value="GROUP_MANAGER">Ketua / Bendahara Utama (Akses Penuh + Verifikasi Dobel)</option>
-              <option value="EDITOR">Staf Pencatat (Tambah, Ubah, Import Transaksi)</option>
-              <option value="VIEWER">Auditor / Pengawas (Hanya Melihat & Export)</option>
+              <option value="GROUP_MANAGER">Ketua / Bendahara (GROUP_MANAGER)</option>
+              <option value="EDITOR">Staf Pencatat (EDITOR)</option>
+              <option value="VIEWER">Auditor / Pengawas (VIEWER)</option>
             </select>
           </div>
 
-          <div className="pt-3 border-t border-[#E2E8F0] flex justify-end gap-2">
+          <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={() => setIsAddMemberOpen(false)}>
               Batal
             </Button>

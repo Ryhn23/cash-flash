@@ -322,7 +322,7 @@ export async function generateSafirExcelWorkbook(
 export async function parseAndValidateExcel(
   buffer: Buffer,
   groupId: string,
-  categories: Array<{ id: string; name: string }>
+  categories?: Array<{ id: string; name: string }>
 ) {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as any);
@@ -345,9 +345,12 @@ export async function parseAndValidateExcel(
           const str = val.trim().toLowerCase();
           if (str.includes('tanggal')) colMap.date = colIdx;
           if (str.includes('uraian') || str.includes('deskripsi')) colMap.description = colIdx;
-          if (str.includes('jumlah') || str.includes('qty')) colMap.quantity = colIdx;
-          if (str.includes('satuan')) colMap.unit = colIdx;
-          if (str.includes('harga satuan') || str.includes('unit price')) colMap.unitPrice = colIdx;
+          if (str.includes('harga satuan') || str.includes('unit price')) {
+            colMap.unitPrice = colIdx;
+          } else if (str.includes('satuan') || str === 'unit') {
+            colMap.unit = colIdx;
+          }
+          if (str.includes('jumlah') || str.includes('qty') || str.includes('kuantitas')) colMap.quantity = colIdx;
           if (str.includes('total')) colMap.totalPrice = colIdx;
           if (str.includes('kategori')) colMap.category = colIdx;
           if (str.includes('tipe')) colMap.type = colIdx;
@@ -365,7 +368,13 @@ export async function parseAndValidateExcel(
     throw new Error('Kolom tidak terdeteksi. Pastikan file memiliki baris judul dengan "Tanggal", "Uraian", "Jumlah", dsb.');
   }
 
-  const categoryByName = new Map(categories.map((c) => [c.name.toLowerCase().trim(), c.id]));
+  const catList = categories || db
+    .select({ id: groupCategories.id, name: groupCategories.name })
+    .from(groupCategories)
+    .where(eq(groupCategories.groupId, groupId))
+    .all();
+
+  const categoryByName = new Map(catList.map((c) => [c.name.toLowerCase().trim(), c.id]));
 
   const parsedRows: Array<{
     rowNum: number;

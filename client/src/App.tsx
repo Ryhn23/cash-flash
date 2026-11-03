@@ -156,13 +156,6 @@ export const App: React.FC = () => {
             </AnimatePresence>
           </Suspense>
         </main>
-
-        <footer className="bg-white border-t border-[#E2E8F0] py-2.5 text-xs text-slate-500 mt-auto">
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-            <span className="font-semibold text-slate-700 font-heading text-xs">Next-Cash</span>
-            <span className="text-[11px] text-slate-400 font-mono">v1.0.0</span>
-          </div>
-        </footer>
       </div>
 
       {/* Slide-over Activity Feed and Audit Trail Drawer */}

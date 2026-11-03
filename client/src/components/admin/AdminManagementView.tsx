@@ -150,11 +150,9 @@ export const AdminManagementView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Admin Bar */}
-      <div className="bg-[#1E1B4B] text-white p-4 rounded-lg border border-indigo-950 shadow-none flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 no-gradient">
+      <div className="bg-[#1E1B4B] text-white p-4 rounded-xl border border-indigo-950 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 no-gradient">
         <div className="flex items-center gap-2.5">
-          <span className="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded tracking-wider uppercase font-sans">
-            SUPER ADMIN
-          </span>
+          <i className="fa-solid fa-shield-halved text-indigo-300 text-sm" />
           <h2 className="text-base font-bold font-heading">Konsol Administrasi</h2>
         </div>
 
@@ -198,7 +196,7 @@ export const AdminManagementView: React.FC = () => {
 
       {/* 1. USERS TAB */}
       {activeAdminTab === 'users' && (
-        <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
           <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] mb-4">
             <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Daftar Pengguna</h3>
             <Button
@@ -233,28 +231,11 @@ export const AdminManagementView: React.FC = () => {
                       <span className="font-sans">{u.name}</span>
                     </td>
                     <td className="px-3 font-mono text-slate-600 tabular-nums">{u.email}</td>
+                    <td className="px-3 font-mono text-xs text-slate-700">{u.systemRole}</td>
                     <td className="px-3">
-                      <span
-                        className={clsx(
-                          'inline-flex items-center h-5 px-1.5 text-[10px] font-semibold rounded-full border',
-                          u.systemRole === 'SUPER_ADMIN'
-                            ? 'bg-[#EEF2FF] text-[#1E1B4B] border-[#C7D2FE]'
-                            : 'bg-slate-100 text-slate-700 border-slate-200'
-                        )}
-                      >
-                        {u.systemRole === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'USER'}
-                      </span>
-                    </td>
-                    <td className="px-3">
-                      <span
-                        className={clsx(
-                          'inline-flex items-center h-5 px-1.5 text-[10px] font-semibold rounded-full border',
-                          u.isActive === 1
-                            ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]'
-                            : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]'
-                        )}
-                      >
-                        {u.isActive === 1 ? 'Aktif' : 'Nonaktif'}
+                      <span className="inline-flex items-center gap-1.5 text-xs text-slate-700">
+                        <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', u.isActive === 1 ? 'bg-emerald-500' : 'bg-slate-300')} />
+                        <span>{u.isActive === 1 ? 'Aktif' : 'Nonaktif'}</span>
                       </span>
                     </td>
                     <td className="px-3">
@@ -303,7 +284,7 @@ export const AdminManagementView: React.FC = () => {
 
       {/* 2. FINANCIAL GROUPS TAB */}
       {activeAdminTab === 'groups' && (
-        <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
           <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] mb-4">
             <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Grup Keuangan</h3>
             <Button
@@ -318,13 +299,13 @@ export const AdminManagementView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {groups.map((g) => (
-              <div key={g.id} className="p-4 border border-[#E2E8F0] rounded-lg bg-white shadow-none hover:border-[#CBD5E1] transition-colors">
+              <div key={g.id} className="p-4 border border-[#E2E8F0] rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#CBD5E1] transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-slate-900 text-sm flex items-center gap-2 font-heading">
                     <i className="fa-solid fa-layer-group text-[#1E1B4B]" />
                     <span>{g.name}</span>
                   </div>
-                  <span className="font-mono text-xs font-bold text-[#1E1B4B] bg-[#EEF2FF] px-2 py-0.5 rounded border border-[#C7D2FE] tabular-nums">
+                  <span className="font-mono text-xs font-semibold text-slate-700 tabular-nums">
                     Pagu: {formatRupiah(g.budgetLimit)}
                   </span>
                 </div>
@@ -354,7 +335,7 @@ export const AdminManagementView: React.FC = () => {
 
       {/* 3. AUDIT TAB */}
       {activeAdminTab === 'audit' && (
-        <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 shadow-none no-gradient">
+        <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
           <div className="pb-3 border-b border-[#E2E8F0] mb-4">
             <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Audit Trail Global</h3>
           </div>
@@ -380,7 +361,7 @@ export const AdminManagementView: React.FC = () => {
                       {log.actorName} <span className="text-slate-400">({log.actorEmail})</span>
                     </td>
                     <td className="px-3">
-                      <span className="font-mono text-[11px] font-bold text-[#1E1B4B] bg-[#EEF2FF] px-2 py-0.5 rounded border border-[#C7D2FE]">
+                      <span className="font-mono text-xs text-slate-800">
                         {log.action}
                       </span>
                     </td>
@@ -404,12 +385,11 @@ export const AdminManagementView: React.FC = () => {
         isOpen={isCreateUserOpen}
         onClose={() => setIsCreateUserOpen(false)}
         title="Tambah Akun Pengguna Baru"
-        description="Buat akun pengguna untuk sistem ledger finansial kolaboratif."
-        maxWidth="md"
+        maxWidth="sm"
       >
-        <form onSubmit={handleCreateUser} className="space-y-4">
+        <form onSubmit={handleCreateUser} className="space-y-3">
           {userFormError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center gap-2">
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
               <i className="fa-solid fa-triangle-exclamation" />
               <span>{userFormError}</span>
             </div>
@@ -442,16 +422,16 @@ export const AdminManagementView: React.FC = () => {
           />
 
           <Select
-            label="Peran Sistem (Global System Role)"
+            label="Peran Sistem"
             value={userSystemRole}
             onChange={(e) => setUserSystemRole(e.target.value as any)}
             required
           >
-            <option value="USER">USER (Hanya akses grup yang ditugaskan)</option>
-            <option value="SUPER_ADMIN">SUPER_ADMIN (Akses penuh seluruh sistem & grup)</option>
+            <option value="USER">USER</option>
+            <option value="SUPER_ADMIN">SUPER_ADMIN</option>
           </Select>
 
-          <div className="pt-3 border-t border-[#E2E8F0] flex justify-end gap-2">
+          <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={() => setIsCreateUserOpen(false)}>
               Batal
             </Button>
@@ -466,14 +446,13 @@ export const AdminManagementView: React.FC = () => {
       <Modal
         isOpen={!!editingUser}
         onClose={() => setEditingUser(null)}
-        title="Ubah Pengguna & Reset Kata Sandi"
-        description={`Mengubah data akun untuk ${editingUser?.name}`}
-        maxWidth="md"
+        title="Ubah Pengguna"
+        maxWidth="sm"
       >
         {editingUser && (
-          <form onSubmit={handleSaveEditUser} className="space-y-4">
+          <form onSubmit={handleSaveEditUser} className="space-y-3">
             {editError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center gap-2">
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
                 <i className="fa-solid fa-triangle-exclamation" />
                 <span>{editError}</span>
               </div>
@@ -506,18 +485,15 @@ export const AdminManagementView: React.FC = () => {
 
             <div>
               <Input
-                label="Reset Kata Sandi Baru (Opsional)"
+                label="Reset Kata Sandi (Opsional)"
                 type="password"
-                placeholder="Kosongkan jika tidak ingin mengubah kata sandi"
+                placeholder="Kosongkan jika tidak diubah"
                 value={resetPassword}
                 onChange={(e) => setResetPassword(e.target.value)}
               />
-              <p className="text-[11px] text-slate-400 mt-1">
-                Jika diisi, kata sandi akan di-hash ulang menggunakan Argon2id.
-              </p>
             </div>
 
-            <div className="pt-3 border-t border-[#E2E8F0] flex justify-end gap-2">
+            <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
               <Button type="button" variant="secondary" size="sm" onClick={() => setEditingUser(null)}>
                 Batal
               </Button>
@@ -533,13 +509,12 @@ export const AdminManagementView: React.FC = () => {
       <Modal
         isOpen={isCreateGroupOpen}
         onClose={() => setIsCreateGroupOpen(false)}
-        title="Buat Grup Keuangan / Workspace Baru"
-        description="Grup baru akan otomatis mendapatkan kategori standar (Tempat Tinggal, Kantor, Perlengkapan, dsb.) dan satuan default."
-        maxWidth="md"
+        title="Buat Grup Keuangan"
+        maxWidth="sm"
       >
-        <form onSubmit={handleCreateGroup} className="space-y-4">
+        <form onSubmit={handleCreateGroup} className="space-y-3">
           {groupFormError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
+            <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
               <i className="fa-solid fa-triangle-exclamation" />
               <span>{groupFormError}</span>
             </div>
@@ -554,7 +529,7 @@ export const AdminManagementView: React.FC = () => {
           />
 
           <Input
-            label="Slug Unik (URL Identifier)"
+            label="Slug Unik"
             placeholder="panitia-safir-2026"
             value={groupSlug}
             onChange={(e) => setGroupSlug(e.target.value.toLowerCase())}
@@ -562,32 +537,32 @@ export const AdminManagementView: React.FC = () => {
           />
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-sans">
-              Deskripsi Singkat
+            <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
+              Deskripsi Singkat (Opsional)
             </label>
             <textarea
               rows={2}
-              className="w-full p-2.5 text-xs font-sans rounded border border-[#E2E8F0] bg-white text-slate-900 focus:outline-none focus:border-[#3730A3] focus:ring-2 focus:ring-[#3730A3]/10"
-              placeholder="Keterangan alokasi anggaran dan tujuan pembukuan..."
+              className="w-full p-2 text-xs font-sans rounded border border-[#CBD5E1] bg-white text-slate-900 focus:outline-none focus:border-[#3730A3]"
+              placeholder="Keterangan alokasi anggaran..."
               value={groupDesc}
               onChange={(e) => setGroupDesc(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5 font-sans">
+            <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
               Pagu Anggaran Awal (Rp)
             </label>
             <input
               type="text"
-              className="w-full h-[38px] px-3 rounded border border-[#E2E8F0] bg-white text-xs font-mono font-bold text-slate-900 tabular-nums focus:outline-none focus:border-[#3730A3]"
+              className="w-full h-[38px] px-3 rounded border border-[#CBD5E1] bg-white text-xs font-mono font-bold text-slate-900 tabular-nums focus:outline-none focus:border-[#3730A3]"
               placeholder="Rp 0"
               value={groupBudget ? formatRupiah(groupBudget) : ''}
               onChange={(e) => setGroupBudget(parseRupiahInput(e.target.value))}
             />
           </div>
 
-          <div className="pt-3 border-t border-[#E2E8F0] flex justify-end gap-2">
+          <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={() => setIsCreateGroupOpen(false)}>
               Batal
             </Button>

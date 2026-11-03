@@ -44,12 +44,9 @@ export const DashboardPage: React.FC = () => {
       {/* Header Toolbar */}
       <div className="flex items-center justify-between pb-1">
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-[#0F172A] tracking-tight font-heading">
+          <h2 className="text-sm sm:text-base font-semibold text-[#0F172A] tracking-tight font-heading">
             Ringkasan Keuangan
           </h2>
-          <span className="text-xs text-slate-400 font-mono">
-            {activeGroup.name}
-          </span>
         </div>
 
         <div className="flex items-center gap-2">

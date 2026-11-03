@@ -32,8 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
       id: 'ledger',
       label: 'Buku Kas Belanja',
       icon: 'fa-solid fa-table-list',
-      badge: anomalyCount > 0 ? `${anomalyCount} Anomali` : undefined,
-      badgeColor: 'bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A]',
+      badge: anomalyCount > 0 ? `${anomalyCount}` : undefined,
+      badgeColor: 'text-amber-600 font-mono text-xs font-semibold',
     },
     {
       id: 'settings',
@@ -61,9 +61,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
           <div className="hidden lg:flex items-center gap-1.5">
             <span className="font-heading font-bold text-sm tracking-tight text-[#0F172A]">
               Next<span className="text-[#3730A3]">-Cash</span>
-            </span>
-            <span className="text-[10px] font-semibold px-1.5 py-0.2 bg-[#EEF2FF] text-[#1E1B4B] rounded border border-[#C7D2FE]">
-              PRO
             </span>
           </div>
         </div>
@@ -119,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
               <div className="hidden lg:flex flex-1 items-center justify-between min-w-0">
                 <span className="truncate">{item.label}</span>
                 {item.badge && (
-                  <span className={clsx('text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ml-1', item.badgeColor)}>
+                  <span className={clsx('shrink-0 ml-1', item.badgeColor)}>
                     {item.badge}
                   </span>
                 )}
@@ -135,14 +132,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
         <button
           type="button"
           onClick={toggleActivityDrawer}
-          className="w-full flex items-center justify-between px-2.5 py-2 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#1E293B] text-xs transition-colors"
+          className="w-full flex items-center gap-2 px-2.5 py-2 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#1E293B] text-xs transition-colors"
           title="Buka Audit Trail & Aktivitas"
         >
-          <div className="flex items-center gap-2">
-            <i className="fa-solid fa-clock-rotate-left text-xs text-[#64748B]" />
-            <span className="hidden lg:inline font-medium">Audit Trail</span>
-          </div>
-          <span className="hidden lg:inline text-[10px] font-mono text-slate-400">Live</span>
+          <i className="fa-solid fa-clock-rotate-left text-xs text-[#64748B]" />
+          <span className="hidden lg:inline font-medium">Audit Trail</span>
         </button>
 
         {/* User Card */}

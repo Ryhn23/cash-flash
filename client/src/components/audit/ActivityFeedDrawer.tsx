@@ -23,19 +23,19 @@ export const ActivityFeedDrawer: React.FC = () => {
   const getActionBadge = (action: string) => {
     switch (action) {
       case 'CREATE_TRANSACTION':
-        return { label: 'Inflow / Tambah', color: 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]' };
+        return { label: 'Tambah Transaksi', dot: 'bg-emerald-500' };
       case 'UPDATE_TRANSACTION':
-        return { label: 'Perubahan Data', color: 'bg-[#EEF2FF] text-[#1E1B4B] border-[#C7D2FE]' };
+        return { label: 'Perubahan Data', dot: 'bg-indigo-600' };
       case 'DELETE_TRANSACTION':
-        return { label: 'Hapus Transaksi', color: 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]' };
+        return { label: 'Hapus Transaksi', dot: 'bg-rose-500' };
       case 'VERIFY_DUPLICATE_OK':
-        return { label: 'Verifikasi Ok', color: 'bg-[#FFFBEB] text-[#92400E] border-[#FDE68A]' };
+        return { label: 'Verifikasi Ok', dot: 'bg-amber-500' };
       case 'IMPORT_EXCEL_TRANSACTIONS':
-        return { label: 'Import Excel', color: 'bg-[#EFF4FF] text-[#1E293B] border-[#CBD5E1]' };
+        return { label: 'Import Excel', dot: 'bg-cyan-600' };
       case 'UPLOAD_RECEIPT':
-        return { label: 'Unggah Nota', color: 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]' };
+        return { label: 'Unggah Nota', dot: 'bg-teal-500' };
       default:
-        return { label: action.replace(/_/g, ' '), color: 'bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]' };
+        return { label: action.replace(/_/g, ' '), dot: 'bg-slate-400' };
     }
   };
 
@@ -115,13 +115,9 @@ export const ActivityFeedDrawer: React.FC = () => {
                         className="p-3 bg-white border border-[#E2E8F0] rounded-lg shadow-none hover:border-slate-300 transition-colors"
                       >
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <span
-                            className={clsx(
-                              'inline-flex items-center h-5 px-1.5 text-[10px] font-semibold rounded-full border',
-                              badge.color
-                            )}
-                          >
-                            {badge.label}
+                          <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-medium">
+                            <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', badge.dot)} />
+                            <span>{badge.label}</span>
                           </span>
                           <span className="text-[10px] text-slate-400 font-mono tabular-nums">
                             {formatDateIndo(log.createdAt)} {new Date(log.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}

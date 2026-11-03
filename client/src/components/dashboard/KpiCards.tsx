@@ -23,7 +23,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
       {/* 1. Belanja & Transaksi */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div>
           <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
             TOTAL PENGELUARAN
@@ -34,14 +34,14 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
         </div>
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500 font-sans">JUMLAH TRANSAKSI</span>
-          <span className="font-mono font-semibold text-slate-800 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+          <span className="font-mono font-medium text-slate-700">
             {kpis.totalTransactions} transaksi
           </span>
         </div>
       </div>
 
       {/* 2. Pagu & Sisa Anggaran */}
-      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div>
           <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
             PAGU ANGGARAN
@@ -65,9 +65,9 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
       <div
         onClick={hasAnomalies ? handleAnomalyClick : undefined}
         className={clsx(
-          'bg-white border rounded-xl p-4 flex flex-col justify-between shadow-none no-gradient transition-all',
+          'bg-white border rounded-xl p-4 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient transition-all',
           hasAnomalies
-            ? 'border-amber-300 hover:border-amber-400 cursor-pointer bg-amber-50/20'
+            ? 'border-amber-300 hover:border-amber-400 cursor-pointer bg-amber-50/10'
             : 'border-[#E2E8F0]'
         )}
       >
@@ -76,19 +76,12 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
             <span className="text-[11px] font-semibold tracking-wider text-slate-500 uppercase font-sans">
               REKONSILIASI KAS
             </span>
-            <span
-              className={clsx(
-                'inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border',
-                isReconciled
-                  ? 'bg-[#F0FDF4] text-[#15803D] border-[#DCFCE7]'
-                  : 'bg-[#FFF1F2] text-[#BE123C] border-[#FFE4E6]'
-              )}
-            >
-              <i className={clsx('text-[9px]', isReconciled ? 'fa-solid fa-circle-check' : 'fa-solid fa-triangle-exclamation')} />
+            <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-medium">
+              <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', isReconciled ? 'bg-emerald-500' : 'bg-rose-500')} />
               <span>{kpis.reconciliationStatus}</span>
             </span>
           </div>
-          <div className="text-sm font-medium text-slate-600 mt-2 font-sans">
+          <div className="text-xs font-normal text-slate-500 mt-2 font-sans">
             {isReconciled ? 'Ledger dan rincian seimbang (Rp 0 selisih)' : 'Ada selisih pada ledger kas'}
           </div>
         </div>
@@ -96,13 +89,13 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-slate-500 font-sans">PERLU VERIFIKASI</span>
           {hasAnomalies ? (
-            <span className="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300">
-              <i className="fa-solid fa-magnifying-glass text-[10px]" />
+            <span className="inline-flex items-center gap-1.5 font-medium text-amber-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
               <span>{kpis.needsReviewCount} Baris &bull; Tinjau</span>
             </span>
           ) : (
-            <span className="text-[#15803D] font-medium flex items-center gap-1">
-              <i className="fa-solid fa-check text-[10px]" />
+            <span className="text-slate-600 font-normal flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               <span>Semua Bersih</span>
             </span>
           )}

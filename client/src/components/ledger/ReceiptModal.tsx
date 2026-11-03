@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Modal } from '../ui/Modal.js';
 import { Button } from '../ui/Button.js';
 import { api } from '../../api/client.js';
+import { formatRupiah } from '../../utils/format.js';
 import type { Transaction } from '../../types/index.js';
 
 export interface ReceiptModalProps {
@@ -55,50 +56,54 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Lampiran & Bukti Nota Pembayaran"
-      description={`Transaksi: ${transaction.description} (${transaction.txDate})`}
-      maxWidth="2xl"
+      title="Lampiran Nota"
+      maxWidth="xl"
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg text-xs flex items-center gap-2">
+          <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
             <i className="fa-solid fa-triangle-exclamation" />
             <span>{error}</span>
           </div>
         )}
 
+        <div className="text-xs text-slate-600 font-medium pb-1.5 border-b border-[#F1F5F9] flex items-center justify-between">
+          <span className="truncate max-w-[280px] font-sans text-slate-800">{transaction.description}</span>
+          <span className="font-mono font-bold text-[#1E1B4B] tabular-nums">{formatRupiah(transaction.totalPrice)}</span>
+        </div>
+
         {/* Existing Receipt Preview */}
         {hasExistingReceipt && receiptUrl ? (
-          <div className="border border-[#E2E8F0] rounded-lg overflow-hidden bg-[#F8FAFC] p-2 shadow-none">
-            <div className="flex items-center justify-between pb-2 px-2 text-xs text-slate-500 font-sans">
-              <span className="font-semibold text-slate-700">Berkas Terunggah:</span>
+          <div className="border border-[#E2E8F0] rounded overflow-hidden bg-[#F8FAFC] p-2 shadow-none">
+            <div className="flex items-center justify-between pb-1.5 px-1 text-xs text-slate-500 font-sans">
+              <span className="font-semibold text-slate-700">Berkas Terlampir</span>
               <a
                 href={receiptUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#3730A3] hover:underline font-bold flex items-center gap-1 active:scale-[0.99]"
+                className="text-[#3730A3] hover:underline font-semibold flex items-center gap-1 active:scale-[0.99] text-[11px]"
               >
                 <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
-                <span>Buka di Tab Baru</span>
+                <span>Buka Penuh</span>
               </a>
             </div>
 
-            <div className="max-h-96 overflow-auto flex items-center justify-center bg-white rounded border border-[#E2E8F0]">
+            <div className="max-h-72 overflow-auto flex items-center justify-center bg-white rounded border border-[#E2E8F0]">
               {isPdf ? (
-                <iframe src={receiptUrl} title="Nota PDF" className="w-full h-96 border-none" />
+                <iframe src={receiptUrl} title="Nota PDF" className="w-full h-72 border-none" />
               ) : (
                 <img
                   src={receiptUrl}
                   alt="Bukti Nota"
-                  className="max-h-96 object-contain rounded"
+                  className="max-h-72 object-contain rounded"
                 />
               )}
             </div>
           </div>
         ) : (
-          <div className="p-8 border-2 border-dashed border-[#CBD5E1] rounded-lg text-center text-xs text-slate-400 bg-[#F8FAFC]">
-            <i className="fa-solid fa-receipt text-3xl text-slate-300 mb-2" />
-            <p className="font-sans">Belum ada bukti nota atau kuitansi yang dilampirkan pada transaksi ini.</p>
+          <div className="p-4 border-2 border-dashed border-[#CBD5E1] rounded text-center text-xs text-slate-400 bg-[#F8FAFC]">
+            <i className="fa-solid fa-receipt text-xl text-slate-300 mb-1" />
+            <p className="font-sans">Belum ada berkas nota yang dilampirkan.</p>
           </div>
         )}
 
@@ -133,9 +138,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </Button>
             )}
           </div>
-          <p className="text-[11px] text-slate-400">
-            Berkas diverifikasi byte-magic secara aman di server untuk mencegah serangan injeksi.
-          </p>
         </form>
 
         <div className="pt-3 border-t border-[#E2E8F0] flex justify-end">

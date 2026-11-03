@@ -78,9 +78,9 @@ export const Modal: React.FC<ModalProps> = ({
           >
             {/* Header */}
             {title && (
-              <div className="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
+              <div className="px-5 py-3.5 border-b border-[#E2E8F0] flex items-center justify-between bg-white">
                 <div>
-                  <h3 className="text-base font-semibold text-[#0F172A] tracking-tight font-heading">{title}</h3>
+                  <h3 className="text-sm sm:text-base font-semibold text-[#0F172A] tracking-tight font-heading">{title}</h3>
                   {description && <p className="text-xs text-[#64748B] mt-0.5 font-sans">{description}</p>}
                 </div>
                 <button
@@ -95,7 +95,7 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Body */}
-            <div className="p-6">{children}</div>
+            <div className="p-4 sm:p-5">{children}</div>
           </motion.div>
         </div>
       )}

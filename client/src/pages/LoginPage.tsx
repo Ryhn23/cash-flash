@@ -139,14 +139,6 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
           </div>
-
-          {/* Security Features Tag */}
-          <div className="mt-6 pt-4 border-t border-[#F1F5F9] flex flex-wrap items-center justify-center gap-1.5 text-[11px]">
-            <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F1F5F9] text-[#475569]">Argon2id Hash</span>
-            <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F1F5F9] text-[#475569]">SHA-256 Session</span>
-            <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F1F5F9] text-[#475569]">CSRF Token</span>
-            <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F1F5F9] text-[#475569]">Strict CSP</span>
-          </div>
         </div>
       </div>
     </div>

@@ -49,26 +49,32 @@ export const Badge: React.FC<BadgeProps> = ({
     }
   }
 
-  // Strict DESIGN.md styles:
-  // Height locked at 20px (h-5), 6px horizontal padding (px-1.5)
-  // Max-pill radius (rounded-full)
-  const variantStyles = {
-    ok: 'bg-[#F0FDF4] text-[#15803D] border border-[#DCFCE7]',
-    warning: 'bg-[#FFFBEB] text-[#92400E] border border-[#FDE68A]',
-    error: 'bg-[#FFF1F2] text-[#BE123C] border border-[#FFE4E6]',
-    primary: 'bg-[#EEF2FF] text-[#1E1B4B] border border-[#C7D2FE]',
-    neutral: 'bg-[#F1F5F9] text-[#475569] border-0',
+  // Clean minimalist status indicator (inline dot + plain text, no heavy pill backgrounds)
+  const dotColor = {
+    ok: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    error: 'bg-rose-500',
+    primary: 'bg-indigo-600',
+    neutral: 'bg-slate-400',
+  }[computedVariant];
+
+  const textColor = {
+    ok: 'text-slate-700',
+    warning: 'text-amber-800 font-medium',
+    error: 'text-rose-700 font-medium',
+    primary: 'text-indigo-950 font-medium',
+    neutral: 'text-slate-600',
   }[computedVariant];
 
   return (
     <span
       className={clsx(
-        'inline-flex items-center justify-center h-5 px-1.5 text-[11px] font-semibold rounded-full select-none no-gradient whitespace-nowrap leading-none gap-1',
-        variantStyles,
+        'inline-flex items-center gap-1.5 text-xs select-none whitespace-nowrap leading-none',
+        textColor,
         className
       )}
     >
-      {computedIcon ? <i className={clsx(computedIcon, 'text-[9px]')} /> : null}
+      <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', dotColor)} />
       <span>{text}</span>
     </span>
   );
