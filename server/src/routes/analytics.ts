@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import {
   financialGroups,
@@ -15,29 +15,29 @@ export const analyticsRouter = new Hono<AppEnv>();
 
 analyticsRouter.use('*', authMiddleware);
 
-// GET /api/groups/:groupId/analytics
+// GET /api/groups/:groupId/analytics - Fast SQL-aggregated telemetry
 analyticsRouter.get('/:groupId/analytics', requireGroupAccess('VIEWER'), async (c) => {
   const groupId = c.req.param('groupId');
   const group = c.get('group') as FinancialGroup;
 
-  // 1. Fetch all transactions for this group
-  const txList = db
+  // 1. Compute KPI metrics using native SQLite aggregations
+  const [kpiRow] = db
     .select({
-      id: transactions.id,
-      txDate: transactions.txDate,
-      type: transactions.type,
-      description: transactions.description,
-      categoryId: transactions.categoryId,
-      quantity: transactions.quantity,
-      unitPrice: transactions.unitPrice,
-      totalPrice: transactions.totalPrice,
-      dataStatus: transactions.dataStatus,
+      totalExpense: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'EXPENSE' THEN ${transactions.totalPrice} ELSE 0 END), 0)`,
+      totalIncome: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'INCOME' THEN ${transactions.totalPrice} ELSE 0 END), 0)`,
+      totalTransactions: sql<number>`COUNT(*)`,
+      needsReviewCount: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.dataStatus} IN ('POTENTIAL_DUPLICATE', 'INCOMPLETE') THEN 1 ELSE 0 END), 0)`,
     })
     .from(transactions)
     .where(eq(transactions.groupId, groupId))
     .all();
 
-  // 2. Fetch categories
+  const totalExpense = Number(kpiRow?.totalExpense || 0);
+  const totalIncome = Number(kpiRow?.totalIncome || 0);
+  const totalTransactions = Number(kpiRow?.totalTransactions || 0);
+  const needsReviewCount = Number(kpiRow?.needsReviewCount || 0);
+
+  // 2. Fetch group categories
   const categories = db
     .select({
       id: groupCategories.id,
@@ -51,112 +51,124 @@ analyticsRouter.get('/:groupId/analytics', requireGroupAccess('VIEWER'), async (
 
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
 
-  // 3. Compute KPI metrics
-  let totalExpense = 0;
-  let totalIncome = 0;
-  let totalTransactions = txList.length;
-  let needsReviewCount = 0;
-
-  for (const t of txList) {
-    if (t.type === 'INCOME') {
-      totalIncome += t.totalPrice;
-    } else {
-      totalExpense += t.totalPrice;
-    }
-
-    if (t.dataStatus === 'POTENTIAL_DUPLICATE' || t.dataStatus === 'INCOMPLETE') {
-      needsReviewCount += 1;
-    }
-  }
-
   // If group has a budget limit defined, use it or fallback to totalIncome
   const budgetEffective = group.budgetLimit > 0 ? group.budgetLimit : totalIncome;
   const remainingBalance = budgetEffective - totalExpense;
   const remainingPercentage =
     budgetEffective > 0 ? Math.max(0, Math.round((remainingBalance / budgetEffective) * 100)) : 0;
 
-  // 4. Category Breakdown Table with automatic "Belum dikategorikan"
-  const catStats = new Map<
-    string,
-    { id: string | null; name: string; count: number; total: number; allocation: number }
-  >();
+  // 3. Category Breakdown aggregated directly via SQL GROUP BY
+  const catAggRows = db
+    .select({
+      categoryId: transactions.categoryId,
+      count: sql<number>`COUNT(*)`,
+      total: sql<number>`COALESCE(SUM(${transactions.totalPrice}), 0)`,
+    })
+    .from(transactions)
+    .where(and(eq(transactions.groupId, groupId), eq(transactions.type, 'EXPENSE')))
+    .groupBy(transactions.categoryId)
+    .all();
 
-  for (const cat of categories) {
-    catStats.set(cat.id, {
-      id: cat.id,
-      name: cat.name,
-      count: 0,
-      total: 0,
-      allocation: cat.budgetAllocation,
+  const catAggMap = new Map<string | null, { count: number; total: number }>();
+  for (const row of catAggRows) {
+    catAggMap.set(row.categoryId, {
+      count: Number(row.count),
+      total: Number(row.total),
     });
   }
 
-  // Uncategorized bucket
-  const uncategorizedKey = 'uncategorized';
-  catStats.set(uncategorizedKey, {
-    id: null,
-    name: 'Belum dikategorikan',
-    count: 0,
-    total: 0,
-    allocation: 0,
+  const categoryBreakdown: Array<{
+    id: string | null;
+    name: string;
+    count: number;
+    total: number;
+    allocation: number;
+    percentage: number;
+  }> = categories.map((cat) => {
+    const agg = catAggMap.get(cat.id) || { count: 0, total: 0 };
+    return {
+      id: cat.id,
+      name: cat.name,
+      count: agg.count,
+      total: agg.total,
+      allocation: cat.budgetAllocation,
+      percentage: totalExpense > 0 ? Number(((agg.total / totalExpense) * 100).toFixed(1)) : 0,
+    };
   });
 
-  for (const t of txList) {
-    if (t.type === 'EXPENSE') {
-      const key = t.categoryId && catStats.has(t.categoryId) ? t.categoryId : uncategorizedKey;
-      const stat = catStats.get(key)!;
-      stat.count += 1;
-      stat.total += t.totalPrice;
-    }
+  // Check for uncategorized expenses
+  const uncategorizedAgg = catAggMap.get(null);
+  if (uncategorizedAgg && uncategorizedAgg.count > 0) {
+    categoryBreakdown.push({
+      id: null,
+      name: 'Belum dikategorikan',
+      count: uncategorizedAgg.count,
+      total: uncategorizedAgg.total,
+      allocation: 0,
+      percentage: totalExpense > 0 ? Number(((uncategorizedAgg.total / totalExpense) * 100).toFixed(1)) : 0,
+    });
+  } else {
+    categoryBreakdown.push({
+      id: null,
+      name: 'Belum dikategorikan',
+      count: 0,
+      total: 0,
+      allocation: 0,
+      percentage: 0,
+    });
   }
 
-  const categoryBreakdown = Array.from(catStats.values()).map((c) => ({
-    ...c,
-    percentage: totalExpense > 0 ? Number(((c.total / totalExpense) * 100).toFixed(1)) : 0,
-  }));
-
-  // 5. Reconciliation Check:
-  // Sum of all individual expense ledger rows vs sum of category breakdown table
-  const sumFromLedger = txList
-    .filter((t) => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + t.totalPrice, 0);
-
+  // 4. Reconciliation Check
+  const sumFromLedger = totalExpense;
   const sumFromCategoryBreakdown = categoryBreakdown.reduce((sum, c) => sum + c.total, 0);
-
   const reconciliationStatus =
     sumFromLedger === sumFromCategoryBreakdown && sumFromLedger === totalExpense
       ? 'OK - Sama'
       : 'Selisih';
 
-  // 6. Trend Timeline (Grouped by Date)
-  const dateMap = new Map<string, { date: string; expense: number; income: number }>();
-  for (const t of txList) {
-    if (!dateMap.has(t.txDate)) {
-      dateMap.set(t.txDate, { date: t.txDate, expense: 0, income: 0 });
-    }
-    const d = dateMap.get(t.txDate)!;
-    if (t.type === 'EXPENSE') {
-      d.expense += t.totalPrice;
-    } else {
-      d.income += t.totalPrice;
-    }
-  }
+  // 5. Trend Timeline aggregated via SQL GROUP BY tx_date
+  const timelineRows = db
+    .select({
+      date: transactions.txDate,
+      expense: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'EXPENSE' THEN ${transactions.totalPrice} ELSE 0 END), 0)`,
+      income: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'INCOME' THEN ${transactions.totalPrice} ELSE 0 END), 0)`,
+    })
+    .from(transactions)
+    .where(eq(transactions.groupId, groupId))
+    .groupBy(transactions.txDate)
+    .orderBy(transactions.txDate)
+    .all();
 
-  const timeline = Array.from(dateMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  const timeline = timelineRows.map((r) => ({
+    date: r.date,
+    expense: Number(r.expense),
+    income: Number(r.income),
+  }));
 
-  // 7. Top Expense Items
-  const topExpenses = txList
-    .filter((t) => t.type === 'EXPENSE')
-    .sort((a, b) => b.totalPrice - a.totalPrice)
-    .slice(0, 7)
-    .map((t) => ({
-      id: t.id,
-      txDate: t.txDate,
-      description: t.description,
-      categoryName: t.categoryId ? categoryMap.get(t.categoryId) || 'Lainnya' : 'Belum dikategorikan',
-      totalPrice: t.totalPrice,
-      dataStatus: t.dataStatus,
-    }));
+  // 6. Top 7 Expense Items via SQL ORDER BY total_price DESC LIMIT 7
+  const topExpensesRows = db
+    .select({
+      id: transactions.id,
+      txDate: transactions.txDate,
+      description: transactions.description,
+      categoryId: transactions.categoryId,
+      totalPrice: transactions.totalPrice,
+      dataStatus: transactions.dataStatus,
+    })
+    .from(transactions)
+    .where(and(eq(transactions.groupId, groupId), eq(transactions.type, 'EXPENSE')))
+    .orderBy(desc(transactions.totalPrice))
+    .limit(7)
+    .all();
+
+  const topExpenses = topExpensesRows.map((t) => ({
+    id: t.id,
+    txDate: t.txDate,
+    description: t.description,
+    categoryName: t.categoryId ? categoryMap.get(t.categoryId) || 'Lainnya' : 'Belum dikategorikan',
+    totalPrice: t.totalPrice,
+    dataStatus: t.dataStatus,
+  }));
 
   return c.json({
     success: true,

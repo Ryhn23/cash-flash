@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   flexRender,
   createColumnHelper,
   type SortingState,
+  type PaginationState,
 } from '@tanstack/react-table';
 import type { Transaction, GroupCategory, GroupRole } from '../../types/index.js';
 import { formatRupiah, formatQuantity } from '../../utils/format.js';
@@ -53,6 +55,15 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [sorting, setSorting] = useState<SortingState>([{ id: 'txDate', desc: true }]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 25,
+  });
+
+  // Reset to first page when search or filters change
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [search, selectedCategory, selectedStatus, selectedType, startDate, endDate]);
 
   // Apply filtering
   const filteredData = useMemo(() => {
@@ -107,7 +118,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         header: () => <span className="w-8 text-center block">NO</span>,
         cell: (info) => (
           <span className="text-slate-400 font-mono text-xs tabular-nums text-center block w-8">
-            {info.row.index + 1}
+            {pagination.pageIndex * pagination.pageSize + info.row.index + 1}
           </span>
         ),
       }),
@@ -278,16 +289,27 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
         },
       }),
     ],
-    [canManage, canEdit, onEditTransaction, onDeleteTransaction, onVerifyDuplicate, onManageReceipt]
+    [
+      canManage,
+      canEdit,
+      pagination.pageIndex,
+      pagination.pageSize,
+      onEditTransaction,
+      onDeleteTransaction,
+      onVerifyDuplicate,
+      onManageReceipt,
+    ]
   );
 
   const table = useReactTable({
     data: filteredData,
     columns,
-    state: { sorting },
+    state: { sorting, pagination },
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const anomalyCount = transactions.filter(
@@ -519,6 +541,81 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-3.5 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-xs text-slate-600 shadow-none no-gradient">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span>Tampilkan:</span>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value));
+            }}
+            className="h-7 px-2 bg-slate-50 border border-[#CBD5E1] rounded text-slate-800 font-medium focus:outline-none focus:border-[#1E1B4B]"
+          >
+            {[25, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size} baris
+              </option>
+            ))}
+            <option value={Math.max(filteredData.length, 1000)}>Semua</option>
+          </select>
+          <span className="text-slate-300">|</span>
+          <span className="font-mono text-slate-700">
+            {filteredData.length === 0
+              ? '0 transaksi'
+              : `${table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} - ${Math.min(
+                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  filteredData.length
+                )} dari ${filteredData.length} transaksi`}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            className="h-7 w-7 rounded border border-[#E2E8F0] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+            title="Halaman Pertama"
+            aria-label="Halaman Pertama"
+          >
+            <i className="fa-solid fa-angles-left text-[10px]" />
+          </button>
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="h-7 w-7 rounded border border-[#E2E8F0] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+            title="Sebelumnya"
+            aria-label="Sebelumnya"
+          >
+            <i className="fa-solid fa-angle-left text-[10px]" />
+          </button>
+
+          <span className="px-2 font-mono text-slate-700">
+            Hal <strong>{table.getPageCount() === 0 ? 0 : table.getState().pagination.pageIndex + 1}</strong> dari{' '}
+            <strong>{table.getPageCount()}</strong>
+          </span>
+
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="h-7 w-7 rounded border border-[#E2E8F0] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+            title="Selanjutnya"
+            aria-label="Selanjutnya"
+          >
+            <i className="fa-solid fa-angle-right text-[10px]" />
+          </button>
+          <button
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            className="h-7 w-7 rounded border border-[#E2E8F0] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+            title="Halaman Terakhir"
+            aria-label="Halaman Terakhir"
+          >
+            <i className="fa-solid fa-angles-right text-[10px]" />
+          </button>
         </div>
       </div>
     </div>

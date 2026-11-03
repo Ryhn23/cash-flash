@@ -11,7 +11,7 @@ import {
   unescapeFormula,
   normalizeDescription,
 } from '../../server/src/utils/security.js';
-import { verifyMagicBytes } from '../../server/src/services/upload.js';
+import { verifyMagicBytes, stripExifFromJpeg } from '../../server/src/services/upload.js';
 
 test('Tahap 1: Security Utilities & Data Sanitization', async (t) => {
   await t.test('Password Hashing & Verification with Argon2id', async () => {
@@ -132,6 +132,32 @@ test('Tahap 1: Security Utilities & Data Sanitization', async (t) => {
     // Too short buffer
     const shortBuffer = Buffer.from([0x01, 0x02]);
     assert.strictEqual(verifyMagicBytes(shortBuffer).valid, false);
+  });
+
+  await t.test('JPEG EXIF Stripping & Privacy Protection', () => {
+    // Construct JPEG with SOI (FF D8) + APP1 EXIF (FF E1 00 08 45 78 69 66) + DQT (FF DB 00 04 01 02) + EOI (FF D9)
+    const jpegWithExif = Buffer.from([
+      0xff, 0xd8, // SOI
+      0xff, 0xe1, 0x00, 0x08, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00, // APP1 Exif (len 8)
+      0xff, 0xdb, 0x00, 0x04, 0x01, 0x02, // DQT (len 4)
+      0xff, 0xd9, // EOI
+    ]);
+
+    const stripped = stripExifFromJpeg(jpegWithExif);
+    // Should retain SOI (FF D8), DQT (FF DB 00 04 01 02), and EOI (FF D9)
+    assert.strictEqual(stripped[0], 0xff);
+    assert.strictEqual(stripped[1], 0xd8);
+    // Must NOT contain 0xFF 0xE1
+    let containsExifMarker = false;
+    for (let i = 0; i < stripped.length - 1; i++) {
+      if (stripped[i] === 0xff && stripped[i + 1] === 0xe1) {
+        containsExifMarker = true;
+        break;
+      }
+    }
+    assert.strictEqual(containsExifMarker, false, 'EXIF marker FF E1 must be stripped');
+    // Total length should be 2 (SOI) + 6 (DQT) + 2 (EOI) = 10 bytes (original was 20 bytes)
+    assert.strictEqual(stripped.length, 10, 'Stripped buffer length must match expected size');
   });
 });
 

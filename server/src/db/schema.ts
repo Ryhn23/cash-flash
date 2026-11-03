@@ -23,7 +23,9 @@ export const sessions = sqliteTable('sessions', {
   userAgent: text('user_agent'),
   expiresAt: text('expires_at').notNull(),
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
-});
+}, (table) => ({
+  sessionExpiresIdx: index('sessions_expires_at_idx').on(table.expiresAt),
+}));
 
 // 3. Financial Groups table
 export const financialGroups = sqliteTable('financial_groups', {
@@ -94,6 +96,8 @@ export const transactions = sqliteTable('transactions', {
 }, (table) => ({
   groupDateIdx: index('transactions_group_date_idx').on(table.groupId, table.txDate),
   groupIdx: index('transactions_group_idx').on(table.groupId),
+  groupStatusIdx: index('transactions_group_status_idx').on(table.groupId, table.dataStatus),
+  groupCategoryIdx: index('transactions_group_cat_idx').on(table.groupId, table.categoryId),
 }));
 
 // 7. Audit Logs table
@@ -110,6 +114,7 @@ export const auditLogs = sqliteTable('audit_logs', {
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => ({
   groupCreatedIdx: index('audit_logs_group_created_idx').on(table.groupId, table.createdAt),
+  actorIdx: index('audit_logs_actor_idx').on(table.actorId),
 }));
 
 export type User = typeof users.$inferSelect;

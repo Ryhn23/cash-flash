@@ -17,6 +17,12 @@ export const securityHeadersMiddleware = secureHeaders({
   xFrameOptions: 'DENY',
   xContentTypeOptions: 'nosniff',
   referrerPolicy: 'strict-origin-when-cross-origin',
+  permissionsPolicy: {
+    camera: [],
+    microphone: [],
+    geolocation: [],
+    payment: [],
+  },
 });
 
 export const payloadLimitMiddleware = bodyLimit({

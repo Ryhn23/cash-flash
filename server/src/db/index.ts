@@ -13,10 +13,14 @@ const DB_PATH = path.join(DB_DIR, 'nextcash.sqlite');
 
 export const sqlite = new Database(DB_PATH);
 
-// Enable WAL mode and foreign keys as strictly required
+// Enable WAL mode, foreign keys, and high-performance PRAGMAs
 sqlite.pragma('journal_mode = WAL');
 sqlite.pragma('foreign_keys = ON');
 sqlite.pragma('busy_timeout = 5000');
+sqlite.pragma('synchronous = NORMAL');
+sqlite.pragma('cache_size = -64000');
+sqlite.pragma('temp_store = MEMORY');
+sqlite.pragma('mmap_size = 268435456');
 
 // Initialize database schema tables directly
 export function initDb() {
@@ -42,6 +46,8 @@ export function initDb() {
       expires_at TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at);
 
     CREATE TABLE IF NOT EXISTS financial_groups (
       id TEXT PRIMARY KEY,
@@ -103,6 +109,8 @@ export function initDb() {
 
     CREATE INDEX IF NOT EXISTS transactions_group_date_idx ON transactions(group_id, tx_date);
     CREATE INDEX IF NOT EXISTS transactions_group_idx ON transactions(group_id);
+    CREATE INDEX IF NOT EXISTS transactions_group_status_idx ON transactions(group_id, data_status);
+    CREATE INDEX IF NOT EXISTS transactions_group_cat_idx ON transactions(group_id, category_id);
 
     CREATE TABLE IF NOT EXISTS audit_logs (
       id TEXT PRIMARY KEY,
@@ -118,6 +126,7 @@ export function initDb() {
     );
 
     CREATE INDEX IF NOT EXISTS audit_logs_group_created_idx ON audit_logs(group_id, created_at);
+    CREATE INDEX IF NOT EXISTS audit_logs_actor_idx ON audit_logs(actor_id);
   `);
 }
 

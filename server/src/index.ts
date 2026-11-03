@@ -14,11 +14,20 @@ import { excelRouter } from './routes/excel.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { auditRouter } from './routes/audit.js';
 import { getReceiptAbsolutePath } from './services/upload.js';
+import { sqlite } from './db/index.js';
 import type { AppEnv } from './types/env.js';
 
 const app = new Hono<AppEnv>();
 
-// Global security headers (Strict CSP, frame deny, etc.)
+// Performance profiling: Attach Server-Timing header to all responses
+app.use('*', async (c, next) => {
+  const start = performance.now();
+  await next();
+  const dur = (performance.now() - start).toFixed(2);
+  c.header('Server-Timing', `total;dur=${dur}`);
+});
+
+// Global security headers (Strict CSP, frame deny, permissions policy)
 app.use('*', securityHeadersMiddleware);
 
 // Payload limit (Max 5MB)
@@ -62,9 +71,43 @@ app.route('/api/groups', analyticsRouter);
 app.route('/api/groups', auditRouter);
 app.route('/api/audit', auditRouter);
 
-// Health check
+// Enhanced Production Health & Readiness check
 app.get('/api/health', (c) => {
-  return c.json({ status: 'ok', service: 'next-cash-ledger', timestamp: new Date().toISOString() });
+  const dbStart = performance.now();
+  let dbStatus = 'ok';
+  let dbPingMs = 0;
+  let dbSizeBytes = 0;
+
+  try {
+    sqlite.prepare('SELECT 1').get();
+    dbPingMs = Number((performance.now() - dbStart).toFixed(2));
+    const dbPath = path.resolve(process.cwd(), 'data', 'nextcash.sqlite');
+    if (fs.existsSync(dbPath)) {
+      dbSizeBytes = fs.statSync(dbPath).size;
+    }
+  } catch {
+    dbStatus = 'unhealthy';
+  }
+
+  const mem = process.memoryUsage();
+
+  return c.json({
+    status: dbStatus === 'ok' ? 'ok' : 'degraded',
+    service: 'next-cash-ledger',
+    version: '1.0.0',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    database: {
+      status: dbStatus,
+      pingMs: dbPingMs,
+      sizeMb: Number((dbSizeBytes / (1024 * 1024)).toFixed(2)),
+      journalMode: 'WAL',
+    },
+    system: {
+      rssMb: Number((mem.rss / (1024 * 1024)).toFixed(1)),
+      heapUsedMb: Number((mem.heapUsed / (1024 * 1024)).toFixed(1)),
+    },
+  });
 });
 
 // Serve frontend build if present in dist/client
@@ -83,7 +126,24 @@ if (fs.existsSync(CLIENT_DIST)) {
 const PORT = Number(process.env.PORT) || 3001;
 
 console.log(`[Next-Cash] Server starting on http://localhost:${PORT}`);
-serve({
+const server = serve({
   fetch: app.fetch,
   port: PORT,
 });
+
+// Graceful shutdown handling for WAL checkpointing and clean DB closure
+function handleShutdown(signal: string) {
+  console.log(`\n[Next-Cash] Signal ${signal} received. Running checkpoint and shutting down...`);
+  try {
+    sqlite.pragma('wal_checkpoint(TRUNCATE)');
+    sqlite.pragma('optimize');
+    sqlite.close();
+    console.log('[Next-Cash] Database closed cleanly.');
+  } catch (err) {
+    console.error('[Next-Cash] Error during database shutdown:', err);
+  }
+  process.exit(0);
+}
+
+process.on('SIGINT', () => handleShutdown('SIGINT'));
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));

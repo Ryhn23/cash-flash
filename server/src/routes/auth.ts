@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { eq, lt } from 'drizzle-orm';
 import { setCookie, deleteCookie } from 'hono/cookie';
 import { db } from '../db/index.js';
 import { users, sessions } from '../db/schema.js';
@@ -17,6 +17,20 @@ import { rateLimit } from '../middleware/rate-limit.js';
 import type { AppEnv } from '../types/env.js';
 
 export const authRouter = new Hono<AppEnv>();
+
+// Periodic session cleanup: Purge expired sessions once per hour (unref timer)
+export function purgeExpiredSessions(): number {
+  try {
+    const nowIso = new Date().toISOString();
+    const res = db.delete(sessions).where(lt(sessions.expiresAt, nowIso)).run();
+    return res.changes;
+  } catch {
+    return 0;
+  }
+}
+
+const sessionCleanupInterval = setInterval(purgeExpiredSessions, 60 * 60 * 1000);
+sessionCleanupInterval.unref();
 
 // Strict login schema
 const loginSchema = z.object({
@@ -61,7 +75,8 @@ authRouter.post('/login', loginRateLimiter, zValidator('json', loginSchema), asy
     return c.json({ success: false, error: 'Email atau kata sandi tidak valid' }, 401);
   }
 
-  // Create session
+  // Create session and purge stale sessions
+  purgeExpiredSessions();
   const rawToken = generateSessionToken();
   const tokenHash = hashToken(rawToken);
   const csrfToken = generateCsrfToken();

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte, isNull, or, like } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/index.js';
 import {
@@ -37,13 +37,52 @@ const transactionInputSchema = z.object({
   verificationNote: z.string().trim().transform(stripHtml).optional(),
 });
 
-// GET /api/groups/:groupId/transactions - List transactions with filters
+// GET /api/groups/:groupId/transactions - List transactions with push-down SQL filters
 transactionsRouter.get('/:groupId/transactions', requireGroupAccess('VIEWER'), async (c) => {
   const groupId = c.req.param('groupId');
   const { categoryId, status, type, search, startDate, endDate } = c.req.query();
 
-  // Query transactions with creator & category
-  let query = db
+  // Build push-down SQL conditions
+  const conditions = [eq(transactions.groupId, groupId)];
+
+  if (categoryId) {
+    if (categoryId === 'uncategorized') {
+      conditions.push(isNull(transactions.categoryId));
+    } else {
+      conditions.push(eq(transactions.categoryId, categoryId));
+    }
+  }
+
+  if (status) {
+    conditions.push(eq(transactions.dataStatus, status as any));
+  }
+
+  if (type) {
+    conditions.push(eq(transactions.type, type as any));
+  }
+
+  if (startDate) {
+    conditions.push(gte(transactions.txDate, startDate));
+  }
+
+  if (endDate) {
+    conditions.push(lte(transactions.txDate, endDate));
+  }
+
+  if (search) {
+    const kw = `%${search}%`;
+    conditions.push(
+      or(
+        like(transactions.description, kw),
+        like(groupCategories.name, kw),
+        like(transactions.verificationNote, kw),
+        like(users.name, kw)
+      )!
+    );
+  }
+
+  // Query transactions directly with SQL predicate filtering and indexes
+  const transactionsList = db
     .select({
       id: transactions.id,
       groupId: transactions.groupId,
@@ -68,51 +107,14 @@ transactionsRouter.get('/:groupId/transactions', requireGroupAccess('VIEWER'), a
     .from(transactions)
     .leftJoin(groupCategories, eq(transactions.categoryId, groupCategories.id))
     .innerJoin(users, eq(transactions.createdBy, users.id))
-    .where(eq(transactions.groupId, groupId));
-
-  const allList = query.orderBy(desc(transactions.txDate), desc(transactions.createdAt)).all();
-
-  // Apply filters
-  let filtered = allList;
-
-  if (categoryId) {
-    if (categoryId === 'uncategorized') {
-      filtered = filtered.filter((t) => !t.categoryId);
-    } else {
-      filtered = filtered.filter((t) => t.categoryId === categoryId);
-    }
-  }
-
-  if (status) {
-    filtered = filtered.filter((t) => t.dataStatus === status);
-  }
-
-  if (type) {
-    filtered = filtered.filter((t) => t.type === type);
-  }
-
-  if (startDate) {
-    filtered = filtered.filter((t) => t.txDate >= startDate);
-  }
-
-  if (endDate) {
-    filtered = filtered.filter((t) => t.txDate <= endDate);
-  }
-
-  if (search) {
-    const kw = search.toLowerCase();
-    filtered = filtered.filter(
-      (t) =>
-        t.description.toLowerCase().includes(kw) ||
-        (t.categoryName && t.categoryName.toLowerCase().includes(kw)) ||
-        (t.verificationNote && t.verificationNote.toLowerCase().includes(kw))
-    );
-  }
+    .where(and(...conditions))
+    .orderBy(desc(transactions.txDate), desc(transactions.createdAt))
+    .all();
 
   return c.json({
     success: true,
-    total: filtered.length,
-    transactions: filtered,
+    total: transactionsList.length,
+    transactions: transactionsList,
   });
 });
 
@@ -162,8 +164,8 @@ transactionsRouter.post(
       })
       .run();
 
-    // Trigger Anomaly Detection Engine
-    recalculateGroupAnomalies(groupId);
+    // Trigger Anomaly Detection Engine (Targeted Delta for this date)
+    recalculateGroupAnomalies(groupId, [body.txDate]);
 
     const inserted = db.select().from(transactions).where(eq(transactions.id, id)).get();
 
@@ -238,8 +240,8 @@ transactionsRouter.patch(
       .where(and(eq(transactions.id, txId), eq(transactions.groupId, groupId)))
       .run();
 
-    // Re-evaluate group anomalies
-    recalculateGroupAnomalies(groupId);
+    // Re-evaluate group anomalies (Targeted Delta for old and new date)
+    recalculateGroupAnomalies(groupId, [currentTx.txDate, body.txDate || currentTx.txDate]);
 
     const updated = db.select().from(transactions).where(eq(transactions.id, txId)).get();
 
@@ -282,8 +284,8 @@ transactionsRouter.delete('/:groupId/transactions/:txId', requireGroupAccess('ED
     .where(and(eq(transactions.id, txId), eq(transactions.groupId, groupId)))
     .run();
 
-  // Re-evaluate anomalies for remaining group transactions (reverts duplicates to OK if only 1 remains!)
-  recalculateGroupAnomalies(groupId);
+  // Re-evaluate anomalies for remaining group transactions (Targeted Delta for deleted date)
+  recalculateGroupAnomalies(groupId, [currentTx.txDate]);
 
   recordAuditLog({
     groupId,

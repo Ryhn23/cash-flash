@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { transactions, type Transaction } from '../db/schema.js';
 import { normalizeDescription } from '../utils/security.js';
@@ -69,10 +69,20 @@ export function evaluateTransactionDataStatus(
 }
 
 /**
- * Re-evaluate and sync all transaction statuses for a group in SQLite.
- * Useful after insert, update, delete, or bulk import.
+ * Re-evaluate and sync transaction statuses for a group in SQLite.
+ * Supports targeted delta calculation if targetDates is provided (drastically reducing DB row scans).
+ * If targetDates is omitted, re-evaluates all transactions in the group (used for bulk imports).
  */
-export function recalculateGroupAnomalies(groupId: string): void {
+export function recalculateGroupAnomalies(groupId: string, targetDates?: string[]): void {
+  const conditions = [eq(transactions.groupId, groupId)];
+
+  if (targetDates && targetDates.length > 0) {
+    const uniqueDates = Array.from(new Set(targetDates.filter(Boolean)));
+    if (uniqueDates.length > 0) {
+      conditions.push(inArray(transactions.txDate, uniqueDates));
+    }
+  }
+
   const allTxs = db
     .select({
       id: transactions.id,
@@ -86,7 +96,7 @@ export function recalculateGroupAnomalies(groupId: string): void {
       verificationNote: transactions.verificationNote,
     })
     .from(transactions)
-    .where(eq(transactions.groupId, groupId))
+    .where(and(...conditions))
     .all();
 
   // Map to count occurrences of [txDate, normalizedDesc, totalPrice]

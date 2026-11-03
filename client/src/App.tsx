@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from './store/useAppStore.js';
@@ -6,12 +6,31 @@ import { api } from './api/client.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { Sidebar } from './components/layout/Sidebar.js';
 import { TopHeader } from './components/layout/TopHeader.js';
-import { DashboardPage } from './pages/DashboardPage.js';
-import { LedgerPage } from './pages/LedgerPage.js';
-import { GroupSettingsView } from './components/settings/GroupSettingsView.js';
-import { AdminManagementView } from './components/admin/AdminManagementView.js';
-import { ActivityFeedDrawer } from './components/audit/ActivityFeedDrawer.js';
 import type { AnalyticsReport } from './types/index.js';
+
+// Lazy-loaded route views to optimize initial bundle size
+const DashboardPage = React.lazy(() =>
+  import('./pages/DashboardPage.js').then((m) => ({ default: m.DashboardPage }))
+);
+const LedgerPage = React.lazy(() =>
+  import('./pages/LedgerPage.js').then((m) => ({ default: m.LedgerPage }))
+);
+const GroupSettingsView = React.lazy(() =>
+  import('./components/settings/GroupSettingsView.js').then((m) => ({ default: m.GroupSettingsView }))
+);
+const AdminManagementView = React.lazy(() =>
+  import('./components/admin/AdminManagementView.js').then((m) => ({ default: m.AdminManagementView }))
+);
+const ActivityFeedDrawer = React.lazy(() =>
+  import('./components/audit/ActivityFeedDrawer.js').then((m) => ({ default: m.ActivityFeedDrawer }))
+);
+
+const ViewSuspenseFallback: React.FC = () => (
+  <div className="py-24 flex flex-col items-center justify-center text-slate-400">
+    <i className="fa-solid fa-circle-notch fa-spin text-2xl text-[#1E1B4B] mb-2" />
+    <span className="text-xs font-semibold font-mono text-slate-500">Memuat tampilan...</span>
+  </div>
+);
 
 export const App: React.FC = () => {
   const { user, setUser, setCsrfToken, activeTab, activeGroup } = useAppStore();
@@ -85,55 +104,57 @@ export const App: React.FC = () => {
         />
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && (
-              <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                <DashboardPage />
-              </motion.div>
-            )}
+          <Suspense fallback={<ViewSuspenseFallback />}>
+            <AnimatePresence mode="wait">
+              {activeTab === 'dashboard' && (
+                <motion.div
+                  key="dashboard"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <DashboardPage />
+                </motion.div>
+              )}
 
-            {activeTab === 'ledger' && (
-              <motion.div
-                key="ledger"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                <LedgerPage />
-              </motion.div>
-            )}
+              {activeTab === 'ledger' && (
+                <motion.div
+                  key="ledger"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <LedgerPage />
+                </motion.div>
+              )}
 
-            {activeTab === 'settings' && activeGroup && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                <GroupSettingsView group={activeGroup} canManage={canManage} />
-              </motion.div>
-            )}
+              {activeTab === 'settings' && activeGroup && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <GroupSettingsView group={activeGroup} canManage={canManage} />
+                </motion.div>
+              )}
 
-            {activeTab === 'admin' && user.systemRole === 'SUPER_ADMIN' && (
-              <motion.div
-                key="admin"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-              >
-                <AdminManagementView />
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {activeTab === 'admin' && user.systemRole === 'SUPER_ADMIN' && (
+                <motion.div
+                  key="admin"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <AdminManagementView />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Suspense>
         </main>
 
         <footer className="bg-white border-t border-[#E2E8F0] py-2.5 text-xs text-slate-500 mt-auto">
@@ -145,7 +166,9 @@ export const App: React.FC = () => {
       </div>
 
       {/* Slide-over Activity Feed and Audit Trail Drawer */}
-      <ActivityFeedDrawer />
+      <Suspense fallback={null}>
+        <ActivityFeedDrawer />
+      </Suspense>
     </div>
   );
 };

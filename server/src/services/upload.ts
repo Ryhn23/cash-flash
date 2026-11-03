@@ -63,18 +63,79 @@ export function verifyMagicBytes(buffer: Buffer): { valid: boolean; ext: string;
 }
 
 /**
- * Save uploaded file with randomized UUID filename
+ * Strips EXIF metadata (APP1 marker 0xFFE1) from JPEG files to protect user privacy (GPS coordinates, camera IDs).
+ */
+export function stripExifFromJpeg(buffer: Buffer): Buffer {
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
+    return buffer;
+  }
+
+  const chunks: Buffer[] = [buffer.subarray(0, 2)]; // Keep SOI (0xFFD8)
+  let offset = 2;
+
+  while (offset < buffer.length - 1) {
+    if (buffer[offset] !== 0xff) {
+      chunks.push(buffer.subarray(offset));
+      break;
+    }
+
+    const marker = buffer[offset + 1];
+    // Standalone markers: SOS (0xDA), EOI (0xD9)
+    if (marker === 0xd9 || marker === 0xda) {
+      chunks.push(buffer.subarray(offset));
+      break;
+    }
+
+    if (offset + 4 > buffer.length) {
+      chunks.push(buffer.subarray(offset));
+      break;
+    }
+
+    const segmentLength = (buffer[offset + 2] << 8) | buffer[offset + 3];
+    const segmentEnd = offset + 2 + segmentLength;
+
+    if (segmentEnd > buffer.length) {
+      chunks.push(buffer.subarray(offset));
+      break;
+    }
+
+    // 0xE1 is APP1 (EXIF / GPS metadata)
+    if (marker === 0xe1) {
+      // Omit EXIF segment
+      offset = segmentEnd;
+    } else {
+      chunks.push(buffer.subarray(offset, segmentEnd));
+      offset = segmentEnd;
+    }
+  }
+
+  return Buffer.concat(chunks);
+}
+
+/**
+ * Save uploaded file with randomized UUID filename and sanitized metadata
  */
 export async function saveUploadedReceipt(buffer: Buffer): Promise<string> {
+  const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+  if (buffer.length > MAX_SIZE) {
+    throw new Error('Ukuran berkas melebihi batas maksimum 5MB.');
+  }
+
   const { valid, ext } = verifyMagicBytes(buffer);
   if (!valid) {
     throw new Error('Tipe berkas tidak didukung. Harap unggah berkas PDF, PNG, JPG, atau WEBP asli.');
   }
 
+  // Strip EXIF / GPS metadata from JPEG photos
+  let finalBuffer = buffer;
+  if (ext === 'jpg') {
+    finalBuffer = stripExifFromJpeg(buffer);
+  }
+
   const filename = `${uuidv4()}.${ext}`;
   const filePath = path.join(UPLOAD_DIR, filename);
 
-  fs.writeFileSync(filePath, buffer);
+  fs.writeFileSync(filePath, finalBuffer);
   return filename;
 }
 
