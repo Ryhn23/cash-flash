@@ -14,7 +14,9 @@
     "build": "vite build",
     "start": "tsx server/src/index.ts",
     "db:seed": "tsx server/src/db/seed.ts",
-    "test": "node --import tsx --test tests/unit/*.test.ts tests/integration/*.test.ts"
+    "test": "node --import tsx --test tests/unit/*.test.ts tests/integration/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
@@ -40,6 +42,7 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.6.5",

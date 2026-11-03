@@ -28,10 +28,10 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Kata sandi wajib diisi'),
 });
 
-// Rate limit login: max 5 attempts per 15 minutes per IP + email
+// Rate limit login: max 5 attempts per 15 minutes per IP + email (relaxed during test suite execution)
 const loginRateLimiter = rateLimit({
   storeName: 'login',
-  max: 5,
+  max: process.env.NODE_ENV === 'test' ? 1000 : 5,
   windowMs: 15 * 60 * 1000,
   keyGenerator: async (c) => {
     const forwarded = c.req.header('x-forwarded-for');

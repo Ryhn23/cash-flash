@@ -74,6 +74,21 @@ export async function runSeed() {
     .run();
   console.log('Seeded USER (EDITOR): staf@safir.org / SafirPassword123!');
 
+  // 3b. Sample User 3: Auditor Pengamat (VIEWER)
+  const auditorId = uuidv4();
+  const auditorHash = await hashPassword('SafirPassword123!');
+  db.insert(users)
+    .values({
+      id: auditorId,
+      name: 'Dewi Auditor',
+      email: 'auditor@safir.org',
+      passwordHash: auditorHash,
+      systemRole: 'USER',
+      isActive: 1,
+    })
+    .run();
+  console.log('Seeded USER (VIEWER): auditor@safir.org / SafirPassword123!');
+
   // 4. Financial Group: "BELANJA SAFIR"
   console.log('--- Seeding Financial Group: BELANJA SAFIR ---');
   const safirGroupId = uuidv4();
@@ -113,6 +128,15 @@ export async function runSeed() {
       groupId: safirGroupId,
       userId: stafId,
       groupRole: 'EDITOR',
+    })
+    .run();
+
+  db.insert(groupMembers)
+    .values({
+      id: uuidv4(),
+      groupId: safirGroupId,
+      userId: auditorId,
+      groupRole: 'VIEWER',
     })
     .run();
 
