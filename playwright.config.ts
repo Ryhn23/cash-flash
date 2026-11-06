@@ -29,6 +29,7 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       PORT: '3099',
+      AUTO_SEED: 'true',
     },
   },
 });

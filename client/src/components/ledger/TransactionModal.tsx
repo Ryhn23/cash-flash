@@ -228,7 +228,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         {/* Row 2: Uraian Deskripsi */}
         <Input
           label="Uraian / Deskripsi Belanja"
-          placeholder="Contoh: Sewa Penginapan Safir, Kertas HVS A4..."
+          placeholder="Contoh: Biaya Operasional Kantor, Kertas HVS A4..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required

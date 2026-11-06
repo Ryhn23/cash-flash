@@ -29,8 +29,8 @@ test.describe('E2E Stage 4: VIEWER User Workflow (Read-Only Enforcement)', () =>
     await expect(page.locator('button[title="Hapus Transaksi"]')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Bukan Dobel' })).toHaveCount(0);
 
-    // 4. "Export .xlsx (Safir)" button MUST BE visible for VIEWER
-    await expect(page.getByRole('button', { name: 'Export .xlsx (Safir)' })).toBeVisible();
+    // 4. "Export .xlsx" button MUST BE visible for VIEWER
+    await expect(page.getByRole('button', { name: 'Export .xlsx' })).toBeVisible();
   });
 
   test('VIEWER can inspect dashboard analytics telemetry', async ({ page }) => {

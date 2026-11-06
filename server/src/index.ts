@@ -16,6 +16,7 @@ import { auditRouter } from './routes/audit.js';
 import { getReceiptAbsolutePath } from './services/upload.js';
 import { sqlite, DB_PATH } from './db/index.js';
 import { runSeed } from './db/seed.js';
+import { initProductionAdmin } from './db/init-admin.js';
 import type { AppEnv } from './types/env.js';
 
 const app = new Hono<AppEnv>();
@@ -126,18 +127,21 @@ if (fs.existsSync(CLIENT_DIST)) {
   });
 }
 
-// Auto-seed initial administrative and group data if DB is empty
-const shouldAutoSeed = process.env.AUTO_SEED !== 'false';
-if (shouldAutoSeed) {
-  try {
-    const userCount = sqlite.prepare('SELECT count(*) as count FROM users').get() as { count: number };
-    if (userCount && userCount.count === 0) {
-      console.log('[Next-Cash] Database kosong terdeteksi. Menjalankan auto-seed data inisial...');
+// Production Fresh Start: Only initializes single SUPER_ADMIN when DB is empty.
+// Demo mock data is ONLY populated if AUTO_SEED === 'true'.
+try {
+  const userCount = sqlite.prepare('SELECT count(*) as count FROM users').get() as { count: number };
+  if (userCount && userCount.count === 0) {
+    if (process.env.AUTO_SEED === 'true') {
+      console.log('[Next-Cash] AUTO_SEED=true terdeteksi. Menjalankan demo seed data...');
       await runSeed();
+    } else {
+      console.log('[Next-Cash] Menjalankan inisialisasi awal Super Admin (Production Fresh Start)...');
+      await initProductionAdmin();
     }
-  } catch (err) {
-    console.error('[Next-Cash] Auto-seed check error:', err);
   }
+} catch (err) {
+  console.error('[Next-Cash] Initialization error:', err);
 }
 
 const PORT = Number(process.env.PORT) || 3001;

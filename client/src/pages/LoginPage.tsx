@@ -30,11 +30,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = (quickEmail: string, quickPass: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPass);
-  };
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 sm:px-6 lg:px-8 no-gradient">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -94,51 +89,6 @@ export const LoginPage: React.FC = () => {
               Masuk ke Ledger
             </Button>
           </form>
-
-          {/* Quick Demo Logins Banner */}
-          <div className="mt-6 pt-5 border-t border-[#E2E8F0]">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.04em] mb-2.5 text-center font-sans">
-              Akses Cepat Akun Demo (Klik untuk Isi):
-            </p>
-
-            <div className="space-y-2 text-xs">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin@nextcash.io', 'AdminPassword123!')}
-                className="w-full text-left p-2.5 rounded border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EEF2FF] hover:border-[#C7D2FE] transition-colors flex items-center justify-between active:scale-[0.99]"
-              >
-                <div>
-                  <div className="font-bold text-[#1E1B4B] font-heading">1. Administrator Utama (SUPER_ADMIN)</div>
-                  <div className="text-[11px] text-slate-500 font-mono">admin@nextcash.io &bull; AdminPassword123!</div>
-                </div>
-                <i className="fa-solid fa-key text-[10px] text-slate-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('bendahara@safir.org', 'SafirPassword123!')}
-                className="w-full text-left p-2.5 rounded border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EEF2FF] hover:border-[#C7D2FE] transition-colors flex items-center justify-between active:scale-[0.99]"
-              >
-                <div>
-                  <div className="font-bold text-slate-900 font-heading">2. Fathir Bendahara (GROUP_MANAGER)</div>
-                  <div className="text-[11px] text-slate-500 font-mono">bendahara@safir.org &bull; SafirPassword123!</div>
-                </div>
-                <i className="fa-solid fa-shield-halved text-[10px] text-slate-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('staf@safir.org', 'SafirPassword123!')}
-                className="w-full text-left p-2.5 rounded border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EEF2FF] hover:border-[#C7D2FE] transition-colors flex items-center justify-between active:scale-[0.99]"
-              >
-                <div>
-                  <div className="font-bold text-slate-900 font-heading">3. Ahmad Pencatat (EDITOR)</div>
-                  <div className="text-[11px] text-slate-500 font-mono">staf@safir.org &bull; SafirPassword123!</div>
-                </div>
-                <i className="fa-solid fa-pen text-[10px] text-slate-400" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

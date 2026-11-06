@@ -130,7 +130,7 @@ export const App: React.FC = () => {
                 </motion.div>
               )}
 
-              {activeTab === 'settings' && activeGroup && (
+              {activeTab === 'settings' && (
                 <motion.div
                   key="settings"
                   initial={{ opacity: 0, y: 6 }}
@@ -138,7 +138,19 @@ export const App: React.FC = () => {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <GroupSettingsView group={activeGroup} canManage={canManage} />
+                  {activeGroup ? (
+                    <GroupSettingsView group={activeGroup} canManage={canManage} />
+                  ) : (
+                    <div className="py-20 text-center max-w-md mx-auto px-4">
+                      <div className="w-12 h-12 rounded bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">
+                        <i className="fa-solid fa-sliders" />
+                      </div>
+                      <h3 className="text-base font-bold text-slate-800 font-heading">Belum Ada Grup Keuangan</h3>
+                      <p className="text-xs text-slate-500 mt-1.5 font-sans">
+                        Pilih grup keuangan aktif terlebih dahulu untuk mengakses pengaturan grup.
+                      </p>
+                    </div>
+                  )}
                 </motion.div>
               )}
 

@@ -14,7 +14,10 @@ services:
       - DATA_DIR=/app/data
       - UPLOAD_DIR=/app/uploads
       - SESSION_SECRET=${SESSION_SECRET:-nextcash-production-secret-random-token-key}
-      - AUTO_SEED=${AUTO_SEED:-true}
+      - ADMIN_NAME=${ADMIN_NAME:-Administrator Utama}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@nextcash.io}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-AdminPassword123!}
+      - AUTO_SEED=${AUTO_SEED:-false}
     volumes:
       - nextcash-data:/app/data
       - nextcash-uploads:/app/uploads

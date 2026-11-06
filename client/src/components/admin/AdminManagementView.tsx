@@ -522,7 +522,7 @@ export const AdminManagementView: React.FC = () => {
 
           <Input
             label="Nama Grup Keuangan"
-            placeholder="Contoh: Panitia Safir 2026, Divisi Logistik..."
+            placeholder="Contoh: Operasional 2026, Divisi Logistik..."
             value={groupName}
             onChange={(e) => handleGroupNameChange(e.target.value)}
             required
@@ -530,7 +530,7 @@ export const AdminManagementView: React.FC = () => {
 
           <Input
             label="Slug Unik"
-            placeholder="panitia-safir-2026"
+            placeholder="operasional-2026"
             value={groupSlug}
             onChange={(e) => setGroupSlug(e.target.value.toLowerCase())}
             required

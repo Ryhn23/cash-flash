@@ -8,10 +8,11 @@ import { TransactionModal } from '../components/ledger/TransactionModal.js';
 import { DuplicateResolutionModal } from '../components/ledger/DuplicateResolutionModal.js';
 import { ExcelImportModal } from '../components/ledger/ExcelImportModal.js';
 import { ReceiptModal } from '../components/ledger/ReceiptModal.js';
+import { Button } from '../components/ui/Button.js';
 
 export const LedgerPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { activeGroup, user } = useAppStore();
+  const { activeGroup, user, setActiveTab } = useAppStore();
 
   // Modals state
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
@@ -50,9 +51,25 @@ export const LedgerPage: React.FC = () => {
 
   if (!activeGroup) {
     return (
-      <div className="py-16 text-center text-slate-500">
-        <i className="fa-solid fa-layer-group text-4xl mb-3 text-slate-300" />
-        <h3 className="text-base font-bold text-slate-800">Pilih Grup Keuangan Terlebih Dahulu</h3>
+      <div className="py-20 text-center max-w-md mx-auto px-4">
+        <div className="w-12 h-12 rounded bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">
+          <i className="fa-solid fa-table-list" />
+        </div>
+        <h3 className="text-base font-bold text-slate-800 font-heading">Belum Ada Grup Keuangan Aktif</h3>
+        <p className="text-xs text-slate-500 mt-1.5 font-sans leading-relaxed">
+          Pilih atau buat grup keuangan terlebih dahulu untuk mulai mencatat transaksi belanja.
+        </p>
+        {user?.systemRole === 'SUPER_ADMIN' && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="mt-4"
+            onClick={() => setActiveTab('admin')}
+            icon="fa-solid fa-shield-halved"
+          >
+            Buka Konsol Admin & Buat Grup
+          </Button>
+        )}
       </div>
     );
   }

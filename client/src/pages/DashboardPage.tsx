@@ -9,7 +9,7 @@ import { Button } from '../components/ui/Button.js';
 import { formatRupiah } from '../utils/format.js';
 
 export const DashboardPage: React.FC = () => {
-  const { activeGroup, setActiveTab } = useAppStore();
+  const { user, activeGroup, setActiveTab } = useAppStore();
 
   const { data, isLoading, refetch } = useQuery<{ success: boolean } & AnalyticsReport>({
     queryKey: ['analytics', activeGroup?.id],
@@ -19,10 +19,27 @@ export const DashboardPage: React.FC = () => {
 
   if (!activeGroup) {
     return (
-      <div className="py-16 text-center text-slate-500">
-        <i className="fa-solid fa-layer-group text-4xl mb-3 text-slate-300" />
-        <h3 className="text-base font-bold text-slate-800 font-heading">Pilih Grup Keuangan Terlebih Dahulu</h3>
-        <p className="text-xs text-slate-500 mt-1 font-sans">Gunakan dropdown pemilih grup di bilah navigasi samping.</p>
+      <div className="py-20 text-center max-w-md mx-auto px-4">
+        <div className="w-12 h-12 rounded bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">
+          <i className="fa-solid fa-layer-group" />
+        </div>
+        <h3 className="text-base font-bold text-slate-800 font-heading">Belum Ada Grup Keuangan Aktif</h3>
+        <p className="text-xs text-slate-500 mt-1.5 font-sans leading-relaxed">
+          {user?.systemRole === 'SUPER_ADMIN'
+            ? 'Database siap dan bersih. Buat grup keuangan atau buku kas pertama Anda melalui Konsol Admin.'
+            : 'Akun Anda belum terdaftar di grup pembukuan mana pun. Silakan hubungi Administrator untuk mendapatkan akses ke grup.'}
+        </p>
+        {user?.systemRole === 'SUPER_ADMIN' && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="mt-4"
+            onClick={() => setActiveTab('admin')}
+            icon="fa-solid fa-shield-halved"
+          >
+            Buka Konsol Admin & Buat Grup
+          </Button>
+        )}
       </div>
     );
   }

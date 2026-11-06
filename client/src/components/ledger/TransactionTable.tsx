@@ -454,7 +454,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             onClick={onExportExcel}
             icon="fa-solid fa-file-excel"
           >
-            Export .xlsx (Safir)
+            Export .xlsx
           </Button>
 
           {canEdit && (

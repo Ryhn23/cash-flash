@@ -69,6 +69,6 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     // Verify Super Admin can add transactions
     await expect(page.getByRole('button', { name: 'Tambah Transaksi' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Import Excel' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Export .xlsx (Safir)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Export .xlsx' })).toBeVisible();
   });
 });
