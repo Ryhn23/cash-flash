@@ -14,7 +14,7 @@ import { excelRouter } from './routes/excel.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { auditRouter } from './routes/audit.js';
 import { getReceiptAbsolutePath } from './services/upload.js';
-import { sqlite } from './db/index.js';
+import { sqlite, DB_PATH } from './db/index.js';
 import type { AppEnv } from './types/env.js';
 
 const app = new Hono<AppEnv>();
@@ -81,9 +81,8 @@ app.get('/api/health', (c) => {
   try {
     sqlite.prepare('SELECT 1').get();
     dbPingMs = Number((performance.now() - dbStart).toFixed(2));
-    const dbPath = path.resolve(process.cwd(), 'data', 'nextcash.sqlite');
-    if (fs.existsSync(dbPath)) {
-      dbSizeBytes = fs.statSync(dbPath).size;
+    if (fs.existsSync(DB_PATH)) {
+      dbSizeBytes = fs.statSync(DB_PATH).size;
     }
   } catch {
     dbStatus = 'unhealthy';
@@ -115,6 +114,9 @@ const CLIENT_DIST = path.resolve(process.cwd(), 'dist/client');
 if (fs.existsSync(CLIENT_DIST)) {
   app.use('/*', serveStatic({ root: './dist/client' }));
   app.get('*', async (c) => {
+    if (c.req.path.startsWith('/api/')) {
+      return c.json({ success: false, error: 'Endpoint API tidak ditemukan' }, 404);
+    }
     const indexPath = path.join(CLIENT_DIST, 'index.html');
     if (fs.existsSync(indexPath)) {
       return c.html(fs.readFileSync(indexPath, 'utf-8'));

@@ -4,12 +4,14 @@ import path from 'node:path';
 import fs from 'node:fs';
 import * as schema from './schema.js';
 
-const DB_DIR = path.resolve(process.cwd(), 'data');
+const DB_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
-const DB_PATH = path.join(DB_DIR, 'nextcash.sqlite');
+export const DB_PATH = process.env.DATABASE_PATH
+  ? path.resolve(process.env.DATABASE_PATH)
+  : path.join(DB_DIR, 'nextcash.sqlite');
 
 export const sqlite = new Database(DB_PATH);
 
