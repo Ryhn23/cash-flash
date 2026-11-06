@@ -15,6 +15,7 @@ import { analyticsRouter } from './routes/analytics.js';
 import { auditRouter } from './routes/audit.js';
 import { getReceiptAbsolutePath } from './services/upload.js';
 import { sqlite, DB_PATH } from './db/index.js';
+import { runSeed } from './db/seed.js';
 import type { AppEnv } from './types/env.js';
 
 const app = new Hono<AppEnv>();
@@ -123,6 +124,20 @@ if (fs.existsSync(CLIENT_DIST)) {
     }
     return c.text('Not Found', 404);
   });
+}
+
+// Auto-seed initial administrative and group data if DB is empty
+const shouldAutoSeed = process.env.AUTO_SEED !== 'false';
+if (shouldAutoSeed) {
+  try {
+    const userCount = sqlite.prepare('SELECT count(*) as count FROM users').get() as { count: number };
+    if (userCount && userCount.count === 0) {
+      console.log('[Next-Cash] Database kosong terdeteksi. Menjalankan auto-seed data inisial...');
+      await runSeed();
+    }
+  } catch (err) {
+    console.error('[Next-Cash] Auto-seed check error:', err);
+  }
 }
 
 const PORT = Number(process.env.PORT) || 3001;

@@ -23,7 +23,33 @@
 
 ---
 
-## 2. Default Seed Accounts & Demo Workspace
+## 2. Quickstart with Docker Compose (Recommended)
+
+Next-Cash sudah disiapkan dengan container multi-stage production yang ringan (~166 MB) dan terisolasi:
+
+```bash
+# 1. Jalankan aplikasi via Docker Compose (akan otomatis build dan auto-seed database awal)
+docker compose up -d --build
+
+# 2. Periksa status container & healthcheck probe
+docker compose ps
+
+# 3. Pantau log aplikasi secara real-time
+docker compose logs -f
+
+# 4. Hentikan container
+docker compose down
+```
+
+Aplikasi langsung dapat diakses di browser: **[http://localhost:3001](http://localhost:3001)**
+
+Persistent data (database SQLite & file bukti nota) disimpan secara aman di named volume Docker:
+- `nextcash-data` &rarr; `/app/data/nextcash.sqlite`
+- `nextcash-uploads` &rarr; `/app/uploads`
+
+---
+
+## 3. Default Seed Accounts & Demo Workspace
 
 The database is seeded with the **"BELANJA SAFIR"** workspace (`Rp 75.000.000` budget) and the following accounts:
 

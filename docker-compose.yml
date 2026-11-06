@@ -14,6 +14,7 @@ services:
       - DATA_DIR=/app/data
       - UPLOAD_DIR=/app/uploads
       - SESSION_SECRET=${SESSION_SECRET:-nextcash-production-secret-random-token-key}
+      - AUTO_SEED=${AUTO_SEED:-true}
     volumes:
       - nextcash-data:/app/data
       - nextcash-uploads:/app/uploads
