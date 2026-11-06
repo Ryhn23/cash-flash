@@ -7,10 +7,12 @@ import { Select } from '../ui/Select.js';
 import { Modal } from '../ui/Modal.js';
 import { formatRupiah, formatDateIndo, parseRupiahInput } from '../../utils/format.js';
 import type { User, FinancialGroup, AuditLogItem } from '../../types/index.js';
+import { useAppStore } from '../../store/useAppStore.js';
 import clsx from 'clsx';
 
 export const AdminManagementView: React.FC = () => {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAppStore();
   const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'groups' | 'audit'>('users');
 
   // Create User Modal State
@@ -25,6 +27,11 @@ export const AdminManagementView: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [resetPassword, setResetPassword] = useState('');
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Delete User Confirmation State
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [deleteUserError, setDeleteUserError] = useState<string | null>(null);
 
   // Create Financial Group Modal State
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
@@ -111,6 +118,22 @@ export const AdminManagementView: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     } catch (err: any) {
       alert(err.message || 'Gagal mengubah status akun');
+    }
+  };
+
+  // Handle Delete User
+  const handleConfirmDeleteUser = async () => {
+    if (!deletingUser) return;
+    setIsDeletingUser(true);
+    setDeleteUserError(null);
+    try {
+      await api.delete(`/api/users/${deletingUser.id}`);
+      setDeletingUser(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    } catch (err: any) {
+      setDeleteUserError(err.message || 'Gagal menghapus pengguna');
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -266,12 +289,24 @@ export const AdminManagementView: React.FC = () => {
                           className={clsx(
                             'px-2 py-1 text-xs rounded border font-semibold active:scale-[0.99]',
                             u.isActive === 1
-                              ? 'text-rose-700 hover:bg-rose-50 border-rose-200'
+                              ? 'text-amber-700 hover:bg-amber-50 border-amber-200'
                               : 'text-emerald-700 hover:bg-emerald-50 border-emerald-200'
                           )}
                         >
                           {u.isActive === 1 ? 'Suspend' : 'Aktifkan'}
                         </button>
+                        {currentUser?.id !== u.id && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDeleteUserError(null);
+                              setDeletingUser(u);
+                            }}
+                            className="px-2 py-1 text-xs text-rose-700 hover:bg-rose-50 rounded border border-rose-200 font-semibold active:scale-[0.99]"
+                          >
+                            Hapus
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -571,6 +606,57 @@ export const AdminManagementView: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete User Confirmation Modal */}
+      <Modal
+        isOpen={!!deletingUser}
+        onClose={() => !isDeletingUser && setDeletingUser(null)}
+        title="Konfirmasi Hapus Pengguna"
+        maxWidth="sm"
+      >
+        {deletingUser && (
+          <div className="space-y-4">
+            {deleteUserError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation" />
+                <span>{deleteUserError}</span>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-700 leading-relaxed font-sans">
+              Apakah Anda yakin ingin menghapus akun pengguna{' '}
+              <strong className="text-slate-900 font-semibold">{deletingUser.name}</strong> ({deletingUser.email})?
+            </p>
+
+            <div className="p-3 bg-rose-50/70 border border-rose-200 rounded text-[11px] text-rose-900 leading-normal font-sans">
+              <i className="fa-solid fa-triangle-exclamation mr-1.5 text-rose-700" />
+              Tindakan ini permanen. Seluruh sesi login dan keanggotaan grup pengguna ini akan dicabut secara langsung.
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={isDeletingUser}
+                onClick={() => setDeletingUser(null)}
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                isLoading={isDeletingUser}
+                onClick={handleConfirmDeleteUser}
+                icon="fa-solid fa-trash-can"
+              >
+                Hapus Pengguna
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

@@ -210,6 +210,26 @@ test('User Level QA Unit & Integration Tests (RBAC Matrix Verification)', async 
       const tx = db.select().from(transactions).where(eq(transactions.id, txA1Id)).get();
       assert.strictEqual(tx?.dataStatus, 'VERIFIED_DUPLICATE_OK');
     });
+
+    await st.test('SUPER_ADMIN cannot delete self (DELETE /api/users/:userId -> 400)', async () => {
+      const res = await app.request(`/api/users/${superAdminId}`, {
+        method: 'DELETE',
+        headers: headersFor(superAdminToken, superAdminCsrf),
+      });
+      assert.strictEqual(res.status, 400);
+      const data = await res.json();
+      assert.strictEqual(data.success, false);
+    });
+
+    await st.test('SUPER_ADMIN can delete another user (DELETE /api/users/:userId -> 200)', async () => {
+      const res = await app.request(`/api/users/${createdUserId}`, {
+        method: 'DELETE',
+        headers: headersFor(superAdminToken, superAdminCsrf),
+      });
+      assert.strictEqual(res.status, 200);
+      const data = await res.json();
+      assert.strictEqual(data.success, true);
+    });
   });
 
   // =========================================================================

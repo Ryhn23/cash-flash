@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { eq, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/index.js';
-import { users, groupMembers, financialGroups } from '../db/schema.js';
+import { users, groupMembers, financialGroups, sessions, transactions, auditLogs } from '../db/schema.js';
 import { hashPassword, stripHtml } from '../utils/security.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requireSuperAdmin } from '../middleware/rbac.js';
@@ -175,15 +175,69 @@ usersRouter.delete('/:userId', async (c) => {
     return c.json({ success: false, error: 'Pengguna tidak ditemukan' }, 404);
   }
 
-  db.delete(users).where(eq(users.id, userId)).run();
+  // Prevent deleting the sole remaining SUPER_ADMIN
+  if (targetUser.systemRole === 'SUPER_ADMIN') {
+    const superAdminCount = db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.systemRole, 'SUPER_ADMIN'))
+      .all().length;
+    if (superAdminCount <= 1) {
+      return c.json({ success: false, error: 'Tidak dapat menghapus satu-satunya SUPER_ADMIN sistem' }, 400);
+    }
+  }
 
-  recordAuditLog({
-    actorId: actor.id,
-    action: 'DELETE_USER',
-    entityType: 'USER',
-    entityId: userId,
-    oldValues: { email: targetUser.email, name: targetUser.name },
-  });
+  try {
+    db.transaction((tx) => {
+      // 1. Reassign any financial groups created by this user to the acting admin
+      tx.update(financialGroups)
+        .set({ createdBy: actor.id })
+        .where(eq(financialGroups.createdBy, userId))
+        .run();
 
-  return c.json({ success: true, message: 'Pengguna berhasil dihapus' });
+      // 2. Reassign transactions created/updated/verified by this user
+      tx.update(transactions)
+        .set({ createdBy: actor.id })
+        .where(eq(transactions.createdBy, userId))
+        .run();
+
+      tx.update(transactions)
+        .set({ updatedBy: actor.id })
+        .where(eq(transactions.updatedBy, userId))
+        .run();
+
+      tx.update(transactions)
+        .set({ verifiedBy: null })
+        .where(eq(transactions.verifiedBy, userId))
+        .run();
+
+      // 3. Reassign audit logs created by this user to preserve complete audit history
+      tx.update(auditLogs)
+        .set({ actorId: actor.id })
+        .where(eq(auditLogs.actorId, userId))
+        .run();
+
+      // 4. Terminate any active sessions of the user
+      tx.delete(sessions).where(eq(sessions.userId, userId)).run();
+
+      // 5. Delete group memberships
+      tx.delete(groupMembers).where(eq(groupMembers.userId, userId)).run();
+
+      // 6. Delete user record
+      tx.delete(users).where(eq(users.id, userId)).run();
+    });
+
+    recordAuditLog({
+      actorId: actor.id,
+      action: 'DELETE_USER',
+      entityType: 'USER',
+      entityId: userId,
+      oldValues: { email: targetUser.email, name: targetUser.name, systemRole: targetUser.systemRole },
+    });
+
+    return c.json({ success: true, message: 'Pengguna berhasil dihapus' });
+  } catch (err: any) {
+    console.error('[Next-Cash] Error deleting user:', err);
+    return c.json({ success: false, error: err.message || 'Gagal menghapus pengguna dari database' }, 500);
+  }
 });
