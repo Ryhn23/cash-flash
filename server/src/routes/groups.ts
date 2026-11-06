@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { eq, and, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'node:fs';
 import { db } from '../db/index.js';
 import {
   financialGroups,
@@ -17,6 +18,7 @@ import { stripHtml } from '../utils/security.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requireSuperAdmin, requireGroupAccess } from '../middleware/rbac.js';
 import { recordAuditLog } from '../services/audit.js';
+import { getReceiptAbsolutePath } from '../services/upload.js';
 import type { AppEnv } from '../types/env.js';
 
 export const groupsRouter = new Hono<AppEnv>();
@@ -211,7 +213,7 @@ groupsRouter.get('/:groupId', requireGroupAccess('VIEWER'), async (c) => {
   });
 });
 
-// PATCH /api/groups/:groupId - Update group settings (GROUP_MANAGER)
+// PATCH /api/groups/:groupId - Update group settings (GROUP_MANAGER / SUPER_ADMIN)
 groupsRouter.patch(
   '/:groupId',
   requireGroupAccess('GROUP_MANAGER'),
@@ -219,6 +221,13 @@ groupsRouter.patch(
     'json',
     z.object({
       name: z.string().trim().min(2).transform(stripHtml).optional(),
+      slug: z
+        .string()
+        .trim()
+        .min(2)
+        .regex(/^[a-z0-9-]+$/, 'Slug hanya boleh huruf kecil, angka, dan tanda hubung')
+        .transform((val) => stripHtml(val).toLowerCase())
+        .optional(),
       description: z.string().trim().transform(stripHtml).optional(),
       budgetLimit: z.number().int().min(0).optional(),
       isArchived: z.number().int().min(0).max(1).optional(),
@@ -232,6 +241,13 @@ groupsRouter.patch(
     const group = db.select().from(financialGroups).where(eq(financialGroups.id, groupId)).get();
     if (!group) return c.json({ success: false, error: 'Grup tidak ditemukan' }, 404);
 
+    if (updates.slug && updates.slug !== group.slug) {
+      const existing = db.select().from(financialGroups).where(eq(financialGroups.slug, updates.slug)).get();
+      if (existing) {
+        return c.json({ success: false, error: 'Slug sudah digunakan oleh grup lain' }, 400);
+      }
+    }
+
     db.update(financialGroups).set(updates).where(eq(financialGroups.id, groupId)).run();
 
     recordAuditLog({
@@ -240,13 +256,66 @@ groupsRouter.patch(
       action: 'UPDATE_GROUP',
       entityType: 'GROUP',
       entityId: groupId,
-      oldValues: { name: group.name, budgetLimit: group.budgetLimit, isArchived: group.isArchived },
+      oldValues: { name: group.name, slug: group.slug, budgetLimit: group.budgetLimit, isArchived: group.isArchived },
       newValues: updates,
     });
 
     return c.json({ success: true, message: 'Pengaturan grup berhasil diperbarui' });
   }
 );
+
+// DELETE /api/groups/:groupId - Permanently delete financial group (SUPER_ADMIN only)
+groupsRouter.delete('/:groupId', requireSuperAdmin, async (c) => {
+  const actor = c.get('user');
+  const groupId = c.req.param('groupId');
+
+  const group = db.select().from(financialGroups).where(eq(financialGroups.id, groupId)).get();
+  if (!group) {
+    return c.json({ success: false, error: 'Grup keuangan tidak ditemukan' }, 404);
+  }
+
+  try {
+    // 1. Delete associated uploaded receipt files from disk
+    const groupTxs = db
+      .select({ receiptPath: transactions.receiptPath })
+      .from(transactions)
+      .where(eq(transactions.groupId, groupId))
+      .all();
+
+    for (const tx of groupTxs) {
+      if (tx.receiptPath) {
+        const fullPath = getReceiptAbsolutePath(tx.receiptPath);
+        if (fullPath && fs.existsSync(fullPath)) {
+          try {
+            fs.unlinkSync(fullPath);
+          } catch {
+            // Ignore file unlink error
+          }
+        }
+      }
+    }
+
+    // 2. Cascade delete from database
+    db.transaction((tx) => {
+      tx.delete(financialGroups).where(eq(financialGroups.id, groupId)).run();
+    });
+
+    // Record audit log with groupId: null so it survives in global audit logs
+    recordAuditLog({
+      groupId: null,
+      actorId: actor.id,
+      action: 'DELETE_GROUP',
+      entityType: 'GROUP',
+      entityId: groupId,
+      oldValues: { name: group.name, slug: group.slug, budgetLimit: group.budgetLimit },
+    });
+
+    return c.json({ success: true, message: 'Grup keuangan beserta seluruh data terkait berhasil dihapus secara permanen' });
+  } catch (err: any) {
+    console.error('[Next-Cash] Error deleting financial group:', err);
+    return c.json({ success: false, error: err.message || 'Gagal menghapus grup keuangan' }, 500);
+  }
+});
 
 // GET /api/groups/:groupId/members
 groupsRouter.get('/:groupId/members', requireGroupAccess('VIEWER'), async (c) => {

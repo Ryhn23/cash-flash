@@ -12,7 +12,7 @@ import clsx from 'clsx';
 
 export const AdminManagementView: React.FC = () => {
   const queryClient = useQueryClient();
-  const { user: currentUser } = useAppStore();
+  const { user: currentUser, activeGroup, setActiveGroup, setActiveTab } = useAppStore();
   const [activeAdminTab, setActiveAdminTab] = useState<'users' | 'groups' | 'audit'>('users');
 
   // Create User Modal State
@@ -40,6 +40,21 @@ export const AdminManagementView: React.FC = () => {
   const [groupDesc, setGroupDesc] = useState('');
   const [groupBudget, setGroupBudget] = useState(0);
   const [groupFormError, setGroupFormError] = useState<string | null>(null);
+
+  // Edit Financial Group Modal State
+  const [editingGroup, setEditingGroup] = useState<FinancialGroup | null>(null);
+  const [editGroupName, setEditGroupName] = useState('');
+  const [editGroupSlug, setEditGroupSlug] = useState('');
+  const [editGroupDesc, setEditGroupDesc] = useState('');
+  const [editGroupBudget, setEditGroupBudget] = useState(0);
+  const [editGroupIsArchived, setEditGroupIsArchived] = useState(0);
+  const [editGroupError, setEditGroupError] = useState<string | null>(null);
+  const [isSavingEditGroup, setIsSavingEditGroup] = useState(false);
+
+  // Delete Financial Group Modal State
+  const [deletingGroup, setDeletingGroup] = useState<FinancialGroup | null>(null);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+  const [deleteGroupError, setDeleteGroupError] = useState<string | null>(null);
 
   // Fetch Users
   const { data: usersData, isLoading: isLoadingUsers } = useQuery<{ success: boolean; users: User[] }>({
@@ -168,6 +183,79 @@ export const AdminManagementView: React.FC = () => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
     setGroupSlug(slugified);
+  };
+
+  // Open Edit Group
+  const handleOpenEditGroup = (g: FinancialGroup) => {
+    setEditingGroup(g);
+    setEditGroupName(g.name);
+    setEditGroupSlug(g.slug);
+    setEditGroupDesc(g.description || '');
+    setEditGroupBudget(g.budgetLimit || 0);
+    setEditGroupIsArchived(g.isArchived || 0);
+    setEditGroupError(null);
+  };
+
+  // Save Edit Group
+  const handleSaveEditGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGroup) return;
+    setIsSavingEditGroup(true);
+    setEditGroupError(null);
+    try {
+      await api.patch(`/api/groups/${editingGroup.id}`, {
+        name: editGroupName.trim(),
+        slug: editGroupSlug.trim().toLowerCase(),
+        description: editGroupDesc.trim(),
+        budgetLimit: editGroupBudget,
+        isArchived: editGroupIsArchived,
+      });
+
+      if (activeGroup?.id === editingGroup.id) {
+        setActiveGroup({
+          ...activeGroup,
+          name: editGroupName.trim(),
+          slug: editGroupSlug.trim().toLowerCase(),
+          description: editGroupDesc.trim(),
+          budgetLimit: editGroupBudget,
+          isArchived: editGroupIsArchived,
+        });
+      }
+
+      setEditingGroup(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    } catch (err: any) {
+      setEditGroupError(err.message || 'Gagal memperbarui grup keuangan');
+    } finally {
+      setIsSavingEditGroup(false);
+    }
+  };
+
+  // Confirm Delete Group
+  const handleConfirmDeleteGroup = async () => {
+    if (!deletingGroup) return;
+    setIsDeletingGroup(true);
+    setDeleteGroupError(null);
+    try {
+      await api.delete(`/api/groups/${deletingGroup.id}`);
+      if (activeGroup?.id === deletingGroup.id) {
+        setActiveGroup(null);
+      }
+      setDeletingGroup(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-groups'] });
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    } catch (err: any) {
+      setDeleteGroupError(err.message || 'Gagal menghapus grup keuangan');
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  };
+
+  // Open Group Workspace directly
+  const handleOpenGroupWorkspace = (g: FinancialGroup) => {
+    setActiveGroup(g);
+    setActiveTab('ledger');
   };
 
   return (
@@ -334,36 +422,84 @@ export const AdminManagementView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {groups.map((g) => (
-              <div key={g.id} className="p-4 border border-[#E2E8F0] rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#CBD5E1] transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="font-bold text-slate-900 text-sm flex items-center gap-2 font-heading">
-                    <i className="fa-solid fa-layer-group text-[#1E1B4B]" />
-                    <span>{g.name}</span>
+              <div key={g.id} className="p-4 border border-[#E2E8F0] rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-[#CBD5E1] transition-colors flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-slate-900 text-sm flex items-center gap-2 font-heading min-w-0">
+                      <div className="w-6 h-6 rounded bg-[#1E1B4B] text-white flex items-center justify-center text-[10px] shrink-0 font-bold">
+                        <i className="fa-solid fa-layer-group" />
+                      </div>
+                      <span className="truncate">{g.name}</span>
+                      {g.isArchived === 1 && (
+                        <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-sans shrink-0 font-semibold">
+                          Diarsipkan
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-mono text-xs font-semibold text-slate-700 tabular-nums shrink-0 ml-2">
+                      Pagu: {formatRupiah(g.budgetLimit)}
+                    </span>
                   </div>
-                  <span className="font-mono text-xs font-semibold text-slate-700 tabular-nums">
-                    Pagu: {formatRupiah(g.budgetLimit)}
-                  </span>
+
+                  <p className="text-xs text-slate-500 mt-2 line-clamp-2 font-sans">
+                    {g.description || 'Tidak ada deskripsi'}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#F1F5F9] text-xs text-slate-500">
+                    <div className="flex items-center gap-3 font-sans">
+                      <span>
+                        <i className="fa-solid fa-users text-[10px] mr-1" />
+                        {g.memberCount || 0} Anggota
+                      </span>
+                      <span>
+                        <i className="fa-solid fa-receipt text-[10px] mr-1" />
+                        {g.transactionCount || 0} Transaksi
+                      </span>
+                    </div>
+                    <span className="font-mono text-[11px] text-slate-400">slug: {g.slug}</span>
+                  </div>
                 </div>
 
-                <p className="text-xs text-slate-500 mt-2 line-clamp-2 font-sans">
-                  {g.description || 'Tidak ada deskripsi'}
-                </p>
+                <div className="flex items-center justify-between gap-1.5 pt-3 mt-3 border-t border-[#E2E8F0]">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenGroupWorkspace(g)}
+                    className="px-2.5 py-1 text-xs text-[#1E1B4B] bg-[#EEF2FF] hover:bg-[#E0E7FF] rounded border border-[#C7D2FE] font-semibold active:scale-[0.99] flex items-center gap-1.5"
+                  >
+                    <i className="fa-solid fa-arrow-up-right-from-square text-[10px]" />
+                    Buka Buku Kas
+                  </button>
 
-                <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#F1F5F9] text-xs text-slate-500">
-                  <div className="flex items-center gap-3 font-sans">
-                    <span>
-                      <i className="fa-solid fa-users text-[10px] mr-1" />
-                      {g.memberCount || 0} Anggota
-                    </span>
-                    <span>
-                      <i className="fa-solid fa-receipt text-[10px] mr-1" />
-                      {g.transactionCount || 0} Transaksi
-                    </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditGroup(g)}
+                      className="px-2 py-1 text-xs text-slate-700 hover:bg-slate-100 rounded border border-[#CBD5E1] font-semibold active:scale-[0.99]"
+                    >
+                      Ubah
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteGroupError(null);
+                        setDeletingGroup(g);
+                      }}
+                      className="px-2 py-1 text-xs text-rose-700 hover:bg-rose-50 rounded border border-rose-200 font-semibold active:scale-[0.99]"
+                    >
+                      Hapus
+                    </button>
                   </div>
-                  <span className="font-mono text-[11px] text-slate-400">slug: {g.slug}</span>
                 </div>
               </div>
             ))}
+
+            {groups.length === 0 && !isLoadingGroups && (
+              <div className="col-span-full py-12 text-center text-slate-400">
+                <i className="fa-solid fa-layer-group text-3xl mb-2 text-slate-300" />
+                <p className="text-xs font-semibold text-slate-600 font-heading">Belum Ada Grup Keuangan</p>
+                <p className="text-xs text-slate-400 mt-0.5 font-sans">Klik "Buat Grup Baru" untuk menambahkan buku kas pertama.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -653,6 +789,142 @@ export const AdminManagementView: React.FC = () => {
                 icon="fa-solid fa-trash-can"
               >
                 Hapus Pengguna
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+      {/* Edit Financial Group Modal */}
+      <Modal
+        isOpen={!!editingGroup}
+        onClose={() => !isSavingEditGroup && setEditingGroup(null)}
+        title="Ubah Grup Keuangan"
+        maxWidth="sm"
+      >
+        {editingGroup && (
+          <form onSubmit={handleSaveEditGroup} className="space-y-3">
+            {editGroupError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation" />
+                <span>{editGroupError}</span>
+              </div>
+            )}
+
+            <Input
+              label="Nama Grup Keuangan"
+              value={editGroupName}
+              onChange={(e) => setEditGroupName(e.target.value)}
+              required
+            />
+
+            <Input
+              label="Slug Unik"
+              value={editGroupSlug}
+              onChange={(e) => setEditGroupSlug(e.target.value.toLowerCase())}
+              required
+            />
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
+                Deskripsi Singkat
+              </label>
+              <textarea
+                rows={2}
+                className="w-full p-2 text-xs font-sans rounded border border-[#CBD5E1] bg-white text-slate-900 focus:outline-none focus:border-[#3730A3]"
+                value={editGroupDesc}
+                onChange={(e) => setEditGroupDesc(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1 font-sans">
+                Pagu Anggaran (Rp)
+              </label>
+              <input
+                type="text"
+                className="w-full h-[38px] px-3 rounded border border-[#CBD5E1] bg-white text-xs font-mono font-bold text-slate-900 tabular-nums focus:outline-none focus:border-[#3730A3]"
+                value={editGroupBudget ? formatRupiah(editGroupBudget) : ''}
+                onChange={(e) => setEditGroupBudget(parseRupiahInput(e.target.value))}
+              />
+            </div>
+
+            <Select
+              label="Status Arsip"
+              value={String(editGroupIsArchived)}
+              onChange={(e) => setEditGroupIsArchived(Number(e.target.value))}
+            >
+              <option value="0">Aktif (Operasional)</option>
+              <option value="1">Diarsipkan (Tutup Buku)</option>
+            </Select>
+
+            <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={isSavingEditGroup}
+                onClick={() => setEditingGroup(null)}
+              >
+                Batal
+              </Button>
+              <Button type="submit" variant="primary" size="sm" isLoading={isSavingEditGroup}>
+                Simpan Perubahan
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* Delete Financial Group Confirmation Modal */}
+      <Modal
+        isOpen={!!deletingGroup}
+        onClose={() => !isDeletingGroup && setDeletingGroup(null)}
+        title="Konfirmasi Hapus Grup Keuangan"
+        maxWidth="sm"
+      >
+        {deletingGroup && (
+          <div className="space-y-4">
+            {deleteGroupError && (
+              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded text-xs flex items-center gap-2">
+                <i className="fa-solid fa-triangle-exclamation" />
+                <span>{deleteGroupError}</span>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-700 leading-relaxed font-sans">
+              Apakah Anda yakin ingin menghapus grup keuangan{' '}
+              <strong className="text-slate-900 font-semibold">{deletingGroup.name}</strong> (slug: {deletingGroup.slug})?
+            </p>
+
+            <div className="p-3 bg-rose-50/70 border border-rose-200 rounded text-[11px] text-rose-900 leading-normal font-sans space-y-1.5">
+              <div className="font-semibold flex items-center gap-1.5 text-rose-800">
+                <i className="fa-solid fa-triangle-exclamation" />
+                Peringatan: Tindakan ini permanen & tidak dapat dibatalkan!
+              </div>
+              <p>
+                Menghapus grup ini akan menghapus seluruh <strong>{deletingGroup.transactionCount || 0} transaksi</strong> buku kas, seluruh kategori belanja, file bukti nota, serta keanggotaan pengguna di grup ini.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={isDeletingGroup}
+                onClick={() => setDeletingGroup(null)}
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                isLoading={isDeletingGroup}
+                onClick={handleConfirmDeleteGroup}
+                icon="fa-solid fa-trash-can"
+              >
+                Hapus Grup Permanen
               </Button>
             </div>
           </div>

@@ -172,6 +172,8 @@ test('User Level QA Unit & Integration Tests (RBAC Matrix Verification)', async 
       createdUserId = data.user.id;
     });
 
+    let createdGroupId = '';
+
     await st.test('SUPER_ADMIN can create a new financial group (POST /api/groups)', async () => {
       const res = await app.request('/api/groups', {
         method: 'POST',
@@ -181,6 +183,18 @@ test('User Level QA Unit & Integration Tests (RBAC Matrix Verification)', async 
           slug: `grp-sa-${Date.now()}`,
           budgetLimit: 25000000,
         }),
+      });
+      assert.strictEqual(res.status, 200);
+      const data = await res.json();
+      assert.strictEqual(data.success, true);
+      assert.ok(data.groupId);
+      createdGroupId = data.groupId;
+    });
+
+    await st.test('SUPER_ADMIN can delete a financial group (DELETE /api/groups/:groupId -> 200)', async () => {
+      const res = await app.request(`/api/groups/${createdGroupId}`, {
+        method: 'DELETE',
+        headers: headersFor(superAdminToken, superAdminCsrf),
       });
       assert.strictEqual(res.status, 200);
       const data = await res.json();
@@ -344,6 +358,14 @@ test('User Level QA Unit & Integration Tests (RBAC Matrix Verification)', async 
 
     await st.test('GROUP_MANAGER is FORBIDDEN from accessing global audit logs (403)', async () => {
       const res = await app.request('/api/audit', { headers: getHeadersFor(managerToken) });
+      assert.strictEqual(res.status, 403);
+    });
+
+    await st.test('GROUP_MANAGER is FORBIDDEN from deleting financial groups (403)', async () => {
+      const res = await app.request(`/api/groups/${groupAId}`, {
+        method: 'DELETE',
+        headers: headersFor(managerToken, managerCsrf),
+      });
       assert.strictEqual(res.status, 403);
     });
   });
