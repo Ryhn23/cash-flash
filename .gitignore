@@ -12,3 +12,4 @@ blob-report/
 *.tmp
 .env
 .env.local
+*.traineddata

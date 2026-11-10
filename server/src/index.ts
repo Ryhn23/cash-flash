@@ -15,6 +15,7 @@ import { excelRouter } from './routes/excel.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { auditRouter } from './routes/audit.js';
 import { receiptsRouter } from './routes/receipts.js';
+import { smartImportRouter } from './routes/smart-import.js';
 import { sqlite, DB_PATH } from './db/index.js';
 import { runSeed } from './db/seed.js';
 import { initProductionAdmin } from './db/init-admin.js';
@@ -58,6 +59,7 @@ app.route('/api/groups', transactionsRouter);
 app.route('/api/groups', excelRouter);
 app.route('/api/groups', analyticsRouter);
 app.route('/api/groups', auditRouter);
+app.route('/api/groups', smartImportRouter);
 app.route('/api/audit', auditRouter);
 
 // Enhanced Production Health & Readiness check

@@ -8,6 +8,7 @@ import { TransactionModal } from '../components/ledger/TransactionModal.js';
 import { DuplicateResolutionModal } from '../components/ledger/DuplicateResolutionModal.js';
 import { ExcelImportModal } from '../components/ledger/ExcelImportModal.js';
 import { ReceiptModal } from '../components/ledger/ReceiptModal.js';
+import { SmartImportModal } from '../components/ledger/SmartImportModal.js';
 import { Button } from '../components/ui/Button.js';
 
 export const LedgerPage: React.FC = () => {
@@ -22,6 +23,7 @@ export const LedgerPage: React.FC = () => {
   const [verifyTx, setVerifyTx] = useState<Transaction | null>(null);
 
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isSmartImportOpen, setIsSmartImportOpen] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [receiptTx, setReceiptTx] = useState<Transaction | null>(null);
 
@@ -145,6 +147,7 @@ export const LedgerPage: React.FC = () => {
           }}
           onExportExcel={handleExportExcel}
           onImportExcel={() => setIsImportOpen(true)}
+          onSmartImport={() => setIsSmartImportOpen(true)}
         />
       )}
 
@@ -156,6 +159,16 @@ export const LedgerPage: React.FC = () => {
         transaction={selectedTx}
         categories={categories}
         units={units}
+      />
+
+      {/* Smart Invoice Import Modal */}
+      <SmartImportModal
+        isOpen={isSmartImportOpen}
+        onClose={() => setIsSmartImportOpen(false)}
+        groupId={activeGroup.id}
+        categories={categories}
+        units={units}
+        onSubmit={handleSubmitTransaction}
       />
 
       {/* Duplicate Resolution Modal */}

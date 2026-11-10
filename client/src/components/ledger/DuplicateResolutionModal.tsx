@@ -49,7 +49,7 @@ export const DuplicateResolutionModal: React.FC<DuplicateResolutionModalProps> =
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Konfirmasi Transaksi Bukan Duplikat"
+      title="Verifikasi Transaksi"
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -86,10 +86,22 @@ export const DuplicateResolutionModal: React.FC<DuplicateResolutionModalProps> =
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Alasan Verifikasi <span className="text-rose-600">*</span>
           </label>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {['Transaksi terpisah & sah', 'Nota berbeda', 'Pembelian bertahap'].map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setNote(preset)}
+                className="px-2 py-0.5 text-[11px] rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 text-slate-600 transition-colors"
+              >
+                + {preset}
+              </button>
+            ))}
+          </div>
           <textarea
             rows={2}
             className="w-full p-2 text-xs font-sans rounded border border-[#CBD5E1] bg-white text-slate-900 focus:outline-none focus:border-[#3730A3] focus:ring-1 focus:ring-[#3730A3]"
-            placeholder="Keterangan mengapa transaksi ini sah dan bukan dobel..."
+            placeholder="Tulis alasan singkat atau klik pilihan di atas..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
             required
@@ -101,8 +113,15 @@ export const DuplicateResolutionModal: React.FC<DuplicateResolutionModalProps> =
           <Button type="button" variant="secondary" size="sm" onClick={onClose} disabled={isSubmitting}>
             Batal
           </Button>
-          <Button type="submit" variant="primary" size="sm" isLoading={isSubmitting} icon="fa-solid fa-shield-check">
-            Konfirmasi Bukan Dobel
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            isLoading={isSubmitting}
+            icon="fa-solid fa-check"
+            aria-label="Konfirmasi Bukan Dobel"
+          >
+            Bukan Dobel
           </Button>
         </div>
       </form>

@@ -35,6 +35,7 @@ const transactionInputSchema = z.object({
   totalPrice: z.number().int().finite().min(0, 'Total harga tidak boleh negatif').max(100_000_000_000_000, 'Total harga melebihi batas sistem').optional(),
   calcMode: z.enum(['FORWARD', 'REVERSE']).default('FORWARD'),
   verificationNote: z.string().trim().max(500, 'Catatan maksimal 500 karakter').transform(stripHtml).optional(),
+  receiptPath: z.string().trim().max(255).nullable().optional(),
 });
 
 // GET /api/groups/:groupId/transactions - List transactions with push-down SQL filters
@@ -159,6 +160,7 @@ transactionsRouter.post(
         totalPrice,
         dataStatus: 'OK',
         verificationNote: body.verificationNote || null,
+        receiptPath: body.receiptPath || null,
         createdBy: actor.id,
         updatedBy: actor.id,
       })
@@ -234,6 +236,7 @@ transactionsRouter.patch(
     if (body.categoryId !== undefined) setValues.categoryId = body.categoryId;
     if (body.unit) setValues.unit = body.unit;
     if (body.verificationNote !== undefined) setValues.verificationNote = body.verificationNote;
+    if (body.receiptPath !== undefined) setValues.receiptPath = body.receiptPath;
 
     db.update(transactions)
       .set(setValues)

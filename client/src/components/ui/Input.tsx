@@ -30,12 +30,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             style={{
-              ...(icon ? { paddingLeft: '2.5rem' } : {}),
+              ...(icon ? { paddingLeft: '2.5rem', paddingInlineStart: '2.5rem' } : {}),
               ...props.style,
             }}
             className={clsx(
               'w-full input-base',
-              icon && '!pl-10',
+              icon && '!pl-10 !ps-10',
               error && 'border-[#BE123C] focus:border-[#BE123C] focus:ring-[#BE123C]/12',
               className
             )}

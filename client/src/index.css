@@ -85,7 +85,8 @@
     color: #0F172A;
     border-radius: 0.25rem; /* 4px */
     height: 38px;
-    padding-inline: 0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
     font-family: 'Inter', sans-serif;

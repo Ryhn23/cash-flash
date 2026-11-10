@@ -27,6 +27,7 @@ export interface TransactionTableProps {
   onManageReceipt: (tx: Transaction) => void;
   onExportExcel: () => void;
   onImportExcel: () => void;
+  onSmartImport?: () => void;
   initialFilterStatus?: string;
 }
 
@@ -42,6 +43,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
   onManageReceipt,
   onExportExcel,
   onImportExcel,
+  onSmartImport,
   initialFilterStatus,
 }) => {
   const canManage = userRole === 'GROUP_MANAGER' || isSuperAdmin;
@@ -256,11 +258,12 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
                 <button
                   type="button"
                   onClick={() => onVerifyDuplicate(tx)}
-                  className="px-2 py-0.5 text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded transition-colors flex items-center gap-1 active:scale-[0.99]"
-                  title="Konfirmasi Bukan Dobel"
+                  aria-label="Bukan Dobel"
+                  title="Konfirmasi bukan transaksi dobel"
+                  className="h-7 px-2 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 rounded transition-colors inline-flex items-center gap-1 active:scale-[0.99]"
                 >
-                  <i className="fa-solid fa-shield-check text-[10px]" />
-                  <span className="hidden xl:inline">Bukan Dobel</span>
+                  <i className="fa-solid fa-check text-[11px] text-amber-600" />
+                  <span>Bukan Dobel</span>
                 </button>
               )}
 
@@ -465,6 +468,17 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
               icon="fa-solid fa-file-import"
             >
               Impor Excel
+            </Button>
+          )}
+
+          {canEdit && onSmartImport && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onSmartImport}
+              icon="fa-solid fa-wand-magic-sparkles"
+            >
+              Pindai Faktur
             </Button>
           )}
 

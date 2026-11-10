@@ -71,7 +71,7 @@ test.describe('E2E Stage 3: GROUP_MANAGER User Workflow (Anomaly Resolution & Gr
 
   test('MANAGER can open Audit Trail drawer and inspect live log entries', async ({ page }) => {
     // Open Audit Trail drawer
-    await page.getByTitle(/Riwayat Aktivitas/i).click();
+    await page.getByTitle(/Riwayat Aktivitas/i).first().click();
 
     // Verify drawer is open with heading "Riwayat Aktivitas & Log"
     const drawer = page.locator('.fixed.inset-y-0.right-0');
