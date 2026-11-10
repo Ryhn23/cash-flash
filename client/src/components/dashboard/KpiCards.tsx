@@ -82,7 +82,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ kpis, onFilterAnomalies }) =
             </span>
           </div>
           <div className="text-xs font-normal text-slate-500 mt-2 font-sans">
-            {isReconciled ? 'Ledger dan rincian seimbang (Rp 0 selisih)' : 'Ada selisih pada ledger kas'}
+            {isReconciled ? 'Buku kas dan rincian seimbang (Rp 0 selisih)' : 'Ada selisih pada pembukuan kas'}
           </div>
         </div>
 

@@ -29,9 +29,9 @@ export const ActivityFeedDrawer: React.FC = () => {
       case 'DELETE_TRANSACTION':
         return { label: 'Hapus Transaksi', dot: 'bg-rose-500' };
       case 'VERIFY_DUPLICATE_OK':
-        return { label: 'Verifikasi Ok', dot: 'bg-amber-500' };
+        return { label: 'Verifikasi Sah', dot: 'bg-amber-500' };
       case 'IMPORT_EXCEL_TRANSACTIONS':
-        return { label: 'Import Excel', dot: 'bg-cyan-600' };
+        return { label: 'Impor Excel', dot: 'bg-cyan-600' };
       case 'UPLOAD_RECEIPT':
         return { label: 'Unggah Nota', dot: 'bg-teal-500' };
       default:
@@ -68,7 +68,7 @@ export const ActivityFeedDrawer: React.FC = () => {
                     <i className="fa-solid fa-clock-rotate-left" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 font-heading">Riwayat & Audit Log</h3>
+                    <h3 className="text-sm font-bold text-slate-900 font-heading">Riwayat Aktivitas &amp; Log</h3>
                     <p className="text-[11px] text-slate-500 font-sans">
                       Grup: {activeGroup?.name || '-'}
                     </p>
@@ -95,9 +95,9 @@ export const ActivityFeedDrawer: React.FC = () => {
               {/* Feed Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {isLoading ? (
-                  <div className="py-12 text-center text-xs text-slate-400 font-mono">
+                  <div className="py-12 text-center text-xs text-slate-400 font-sans">
                     <i className="fa-solid fa-circle-notch fa-spin text-lg mb-2 text-[#1E1B4B]" />
-                    <div>Memuat log aktivitas...</div>
+                    <div>Memuat riwayat aktivitas...</div>
                   </div>
                 ) : logs.length === 0 ? (
                   <div className="py-12 text-center text-xs text-slate-400 font-sans">

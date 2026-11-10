@@ -70,7 +70,7 @@ export const WorkspaceSwitcher: React.FC = () => {
           <div className="absolute left-0 top-full mt-1.5 w-64 bg-white border border-[#CBD5E1] rounded-lg z-50 py-1 overflow-hidden no-gradient shadow-[0_4px_12px_-2px_rgba(15,23,42,0.06),0_2px_4px_-1px_rgba(15,23,42,0.04)]">
             <div className="px-3 py-1.5 border-b border-[#E2E8F0] bg-[#FAFAFA]">
               <span className="text-[11px] font-semibold text-[#475569] uppercase tracking-[0.04em] font-sans">
-                Workspace Keuangan
+                Daftar Grup Keuangan
               </span>
             </div>
             <div className="max-h-60 overflow-y-auto">

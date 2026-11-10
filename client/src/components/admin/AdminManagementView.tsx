@@ -299,8 +299,8 @@ export const AdminManagementView: React.FC = () => {
               activeAdminTab === 'audit' ? 'bg-white text-[#1E1B4B] shadow-none' : 'text-indigo-200 hover:text-white'
             )}
           >
-            <i className="fa-solid fa-shield-halved mr-1.5" />
-            Audit Global
+            <i className="fa-solid fa-clock-rotate-left mr-1.5" />
+            Riwayat Aktivitas
           </button>
         </div>
       </div>
@@ -342,7 +342,9 @@ export const AdminManagementView: React.FC = () => {
                       <span className="font-sans">{u.name}</span>
                     </td>
                     <td className="px-3 font-mono text-slate-600 tabular-nums">{u.email}</td>
-                    <td className="px-3 font-mono text-xs text-slate-700">{u.systemRole}</td>
+                    <td className="px-3 text-xs text-slate-700 font-sans">
+                      {u.systemRole === 'SUPER_ADMIN' ? 'Admin Utama' : 'Pengguna Biasa'}
+                    </td>
                     <td className="px-3">
                       <span className="inline-flex items-center gap-1.5 text-xs text-slate-700">
                         <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', u.isActive === 1 ? 'bg-emerald-500' : 'bg-slate-300')} />
@@ -352,11 +354,19 @@ export const AdminManagementView: React.FC = () => {
                     <td className="px-3">
                       <div className="flex flex-wrap gap-1">
                         {u.groups && u.groups.length > 0 ? (
-                          u.groups.map((g) => (
-                            <span key={g.groupId} className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-sans">
-                              {g.groupName} ({g.groupRole})
-                            </span>
-                          ))
+                          u.groups.map((g) => {
+                            const roleIndo =
+                              g.groupRole === 'GROUP_MANAGER'
+                                ? 'Ketua'
+                                : g.groupRole === 'EDITOR'
+                                ? 'Pencatat'
+                                : 'Pengamat';
+                            return (
+                              <span key={g.groupId} className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-sans">
+                                {g.groupName} ({roleIndo})
+                              </span>
+                            );
+                          })
                         ) : (
                           <span className="text-[11px] text-slate-400 italic font-sans">Belum ada grup</span>
                         )}
@@ -381,7 +391,7 @@ export const AdminManagementView: React.FC = () => {
                               : 'text-emerald-700 hover:bg-emerald-50 border-emerald-200'
                           )}
                         >
-                          {u.isActive === 1 ? 'Suspend' : 'Aktifkan'}
+                          {u.isActive === 1 ? 'Nonaktifkan' : 'Aktifkan'}
                         </button>
                         {currentUser?.id !== u.id && (
                           <button
@@ -456,7 +466,7 @@ export const AdminManagementView: React.FC = () => {
                         {g.transactionCount || 0} Transaksi
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] text-slate-400">slug: {g.slug}</span>
+                    <span className="font-mono text-[11px] text-slate-400">Tautan: {g.slug}</span>
                   </div>
                 </div>
 
@@ -508,7 +518,7 @@ export const AdminManagementView: React.FC = () => {
       {activeAdminTab === 'audit' && (
         <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
           <div className="pb-3 border-b border-[#E2E8F0] mb-4">
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Audit Trail Global</h3>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 font-heading">Riwayat Aktivitas Sistem</h3>
           </div>
 
           <div className="border border-[#E2E8F0] rounded-lg overflow-hidden bg-white shadow-none">
@@ -598,8 +608,8 @@ export const AdminManagementView: React.FC = () => {
             onChange={(e) => setUserSystemRole(e.target.value as any)}
             required
           >
-            <option value="USER">USER</option>
-            <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+            <option value="USER">Pengguna Biasa (USER)</option>
+            <option value="SUPER_ADMIN">Admin Utama (SUPER_ADMIN)</option>
           </Select>
 
           <div className="pt-2 border-t border-[#E2E8F0] flex justify-end gap-2">
@@ -650,8 +660,8 @@ export const AdminManagementView: React.FC = () => {
               onChange={(e) => setEditingUser({ ...editingUser, systemRole: e.target.value as any })}
               required
             >
-              <option value="USER">USER</option>
-              <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+              <option value="USER">Pengguna Biasa (USER)</option>
+              <option value="SUPER_ADMIN">Admin Utama (SUPER_ADMIN)</option>
             </Select>
 
             <div>
@@ -700,7 +710,7 @@ export const AdminManagementView: React.FC = () => {
           />
 
           <Input
-            label="Slug Unik"
+            label="ID Tautan Grup (Slug)"
             placeholder="operasional-2026"
             value={groupSlug}
             onChange={(e) => setGroupSlug(e.target.value.toLowerCase())}
@@ -818,7 +828,7 @@ export const AdminManagementView: React.FC = () => {
             />
 
             <Input
-              label="Slug Unik"
+              label="ID Tautan Grup (Slug)"
               value={editGroupSlug}
               onChange={(e) => setEditGroupSlug(e.target.value.toLowerCase())}
               required

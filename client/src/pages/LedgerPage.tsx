@@ -118,7 +118,7 @@ export const LedgerPage: React.FC = () => {
       {isLoadingTx ? (
         <div className="py-24 text-center text-slate-400">
           <i className="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-[#1E1B4B]" />
-          <p className="text-xs font-medium">Memuat ledger transaksi...</p>
+          <p className="text-xs font-medium font-sans">Memuat buku kas transaksi...</p>
         </div>
       ) : (
         <TransactionTable

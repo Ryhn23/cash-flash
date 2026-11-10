@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
       {/* 2. Workspace Selector */}
       <div className="p-3 border-b border-[#E2E8F0] bg-[#FAFAFA]">
         <div className="hidden lg:block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 px-1 label-sm">
-          Workspace
+          Grup Keuangan
         </div>
         <WorkspaceSwitcher />
       </div>
@@ -133,10 +133,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
           type="button"
           onClick={toggleActivityDrawer}
           className="w-full flex items-center gap-2 px-2.5 py-2 rounded border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] text-[#1E293B] text-xs transition-colors"
-          title="Buka Audit Trail & Aktivitas"
+          title="Buka Riwayat Aktivitas"
         >
           <i className="fa-solid fa-clock-rotate-left text-xs text-[#64748B]" />
-          <span className="hidden lg:inline font-medium">Audit Trail</span>
+          <span className="hidden lg:inline font-medium">Riwayat Aktivitas</span>
         </button>
 
         {/* User Card */}
@@ -149,8 +149,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
               <div className="text-xs font-semibold text-slate-900 truncate leading-tight">
                 {user?.name}
               </div>
-              <div className="text-[10px] text-slate-400 font-mono truncate leading-none mt-0.5">
-                {user?.systemRole === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'MEMBER'}
+              <div className="text-[10px] text-slate-500 font-sans truncate leading-none mt-0.5">
+                {user?.systemRole === 'SUPER_ADMIN' ? 'Admin Utama' : 'Anggota'}
               </div>
             </div>
           </div>
@@ -159,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
             type="button"
             onClick={handleLogout}
             className="p-1.5 text-slate-400 hover:text-[#BE123C] rounded hover:bg-rose-50 transition-colors"
-            title="Keluar (Logout)"
+            title="Keluar Akun"
           >
             <i className="fa-solid fa-arrow-right-from-bracket text-xs" />
           </button>

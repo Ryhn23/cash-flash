@@ -44,7 +44,7 @@ export const LoginPage: React.FC = () => {
           Next<span className="text-[#3730A3]">-Cash</span>
         </h1>
         <p className="mt-1 text-center text-xs font-medium text-[#475569] font-sans">
-          Sovereign Operations &bull; Collaborative Ledger & Expense Telemetry
+          Sistem Pembukuan &amp; Manajemen Kas Bersama
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export const LoginPage: React.FC = () => {
               isLoading={isLoading}
               icon="fa-solid fa-arrow-right-to-bracket"
             >
-              Masuk ke Ledger
+              Masuk ke Sistem
             </Button>
           </form>
         </div>

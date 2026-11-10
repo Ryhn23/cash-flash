@@ -90,7 +90,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
       onImportSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Gagal menyimpan data import');
+      setError(err.message || 'Gagal menyimpan data impor');
     } finally {
       setIsCommitting(false);
     }
@@ -157,7 +157,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                     isLoading={isPreviewing}
                     icon="fa-solid fa-magnifying-glass"
                   >
-                    Uji Validasi (Dry-Run)
+                    Uji Validasi Data
                   </Button>
                 </div>
               </div>
@@ -271,7 +271,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({
                   disabled={report.validCount + report.duplicateCount === 0}
                   icon="fa-solid fa-cloud-arrow-up"
                 >
-                  Konfirmasi & Komit ({report.validCount + report.duplicateCount} Baris)
+                  Konfirmasi & Simpan ({report.validCount + report.duplicateCount} Baris)
                 </Button>
               </div>
             </div>

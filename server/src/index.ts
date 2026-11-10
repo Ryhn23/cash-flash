@@ -6,6 +6,7 @@ import fs from 'node:fs';
 
 import { securityHeadersMiddleware, payloadLimitMiddleware } from './middleware/security.js';
 import { csrfProtection } from './middleware/csrf.js';
+import { authMiddleware } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { groupsRouter } from './routes/groups.js';
@@ -13,7 +14,7 @@ import { transactionsRouter } from './routes/transactions.js';
 import { excelRouter } from './routes/excel.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { auditRouter } from './routes/audit.js';
-import { getReceiptAbsolutePath } from './services/upload.js';
+import { receiptsRouter } from './routes/receipts.js';
 import { sqlite, DB_PATH } from './db/index.js';
 import { runSeed } from './db/seed.js';
 import { initProductionAdmin } from './db/init-admin.js';
@@ -38,30 +39,16 @@ app.use('*', payloadLimitMiddleware);
 // CSRF double submit / session-bound token defense
 app.use('*', csrfProtection);
 
-// Safe receipt file serving
-app.get('/uploads/:filename', async (c) => {
-  const filename = c.req.param('filename');
-  const safePath = getReceiptAbsolutePath(filename);
-  if (!safePath) {
-    return c.json({ success: false, error: 'Berkas tidak ditemukan' }, 404);
-  }
-
-  const ext = path.extname(filename).toLowerCase();
-  const mimeTypes: Record<string, string> = {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.webp': 'image/webp',
-    '.pdf': 'application/pdf',
-  };
-
-  const contentType = mimeTypes[ext] || 'application/octet-stream';
-  c.header('Content-Type', contentType);
-  c.header('Content-Disposition', `inline; filename="${path.basename(filename)}"`);
-
-  const fileStream = fs.createReadStream(safePath);
-  return c.body(fileStream as any);
+// Strict cache prevention on all financial APIs (Defense against browser history extraction on shared terminals)
+app.use('/api/*', async (c, next) => {
+  await next();
+  c.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  c.header('Pragma', 'no-cache');
+  c.header('Expires', '0');
 });
+
+// Safe authenticated receipt file serving with tenant boundary check
+app.route('/uploads', receiptsRouter);
 
 // Mount API routes
 app.route('/api/auth', authRouter);

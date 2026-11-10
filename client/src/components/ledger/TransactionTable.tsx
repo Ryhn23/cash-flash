@@ -137,11 +137,11 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
           const type = info.getValue();
           return type === 'INCOME' ? (
             <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F0FDF4] text-[#15803D] border border-[#DCFCE7] whitespace-nowrap">
-              Inflow
+              Masuk
             </span>
           ) : (
             <span className="inline-flex items-center h-5 px-1.5 text-[11px] font-semibold rounded-full bg-[#F1F5F9] text-[#475569] whitespace-nowrap">
-              Outflow
+              Keluar
             </span>
           );
         },
@@ -173,7 +173,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             <span className="text-xs text-slate-800 font-medium whitespace-nowrap">{val}</span>
           ) : (
             <span className="text-[11px] italic text-amber-800 bg-[#FFFBEB] px-1.5 py-0.5 rounded border border-[#FDE68A] whitespace-nowrap">
-              Unassigned
+              Belum Dikategorikan
             </span>
           );
         },
@@ -454,7 +454,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
             onClick={onExportExcel}
             icon="fa-solid fa-file-excel"
           >
-            Export .xlsx
+            Unduh Excel (.xlsx)
           </Button>
 
           {canEdit && (
@@ -464,7 +464,7 @@ export const TransactionTable: React.FC<TransactionTableProps> = ({
               onClick={onImportExcel}
               icon="fa-solid fa-file-import"
             >
-              Import Excel
+              Impor Excel
             </Button>
           )}
 

@@ -78,29 +78,31 @@
 }
 
 /* Input Fields (38px, Inter body-md, 4px radius) */
-.input-base {
-  border: 1px solid #E2E8F0;
-  background-color: #FFFFFF;
-  color: #0F172A;
-  border-radius: 0.25rem; /* 4px */
-  height: 38px;
-  padding: 0 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-family: 'Inter', sans-serif;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
-}
+@layer components {
+  .input-base {
+    border: 1px solid #E2E8F0;
+    background-color: #FFFFFF;
+    color: #0F172A;
+    border-radius: 0.25rem; /* 4px */
+    height: 38px;
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
 
-.input-base:focus {
-  outline: none;
-  border-color: #3730A3;
-  box-shadow: 0 0 0 2px rgba(55, 48, 163, 0.12);
-}
+  .input-base:focus {
+    outline: none;
+    border-color: #3730A3;
+    box-shadow: 0 0 0 2px rgba(55, 48, 163, 0.12);
+  }
 
-.input-base:disabled {
-  background-color: #F8FAFC;
-  color: #94A3B8;
-  cursor: not-allowed;
+  .input-base:disabled {
+    background-color: #F8FAFC;
+    color: #94A3B8;
+    cursor: not-allowed;
+  }
 }
 
 /* Custom scrollbars */

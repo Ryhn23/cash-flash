@@ -6,7 +6,7 @@ test.describe('E2E Stage 4: VIEWER User Workflow (Read-Only Enforcement)', () =>
     await page.goto('/');
     await page.getByLabel('Alamat Email').fill('auditor@safir.org');
     await page.getByLabel('Kata Sandi').fill('SafirPassword123!');
-    await page.getByRole('button', { name: 'Masuk ke Ledger' }).click();
+    await page.getByRole('button', { name: /Masuk/i }).click();
     await expect(page.locator('aside')).toContainText('Dewi Auditor');
   });
 
@@ -21,16 +21,16 @@ test.describe('E2E Stage 4: VIEWER User Workflow (Read-Only Enforcement)', () =>
     // 1. "Tambah Transaksi" button MUST NOT exist for VIEWER
     await expect(page.getByRole('button', { name: 'Tambah Transaksi' })).toHaveCount(0);
 
-    // 2. "Import Excel" button MUST NOT exist for VIEWER
-    await expect(page.getByRole('button', { name: 'Import Excel' })).toHaveCount(0);
+    // 2. "Impor Excel" button MUST NOT exist for VIEWER
+    await expect(page.getByRole('button', { name: /Impor Excel|Import Excel/i })).toHaveCount(0);
 
     // 3. Row action buttons (Edit, Delete, Verify Duplicate) MUST NOT exist for VIEWER
     await expect(page.locator('button[title="Ubah Transaksi"]')).toHaveCount(0);
     await expect(page.locator('button[title="Hapus Transaksi"]')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Bukan Dobel' })).toHaveCount(0);
 
-    // 4. "Export .xlsx" button MUST BE visible for VIEWER
-    await expect(page.getByRole('button', { name: 'Export .xlsx' })).toBeVisible();
+    // 4. "Unduh Excel" button MUST BE visible for VIEWER
+    await expect(page.getByRole('button', { name: /Unduh Excel|Export \.xlsx/i })).toBeVisible();
   });
 
   test('VIEWER can inspect dashboard analytics telemetry', async ({ page }) => {

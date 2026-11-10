@@ -32,14 +32,19 @@ export function purgeExpiredSessions(): number {
 const sessionCleanupInterval = setInterval(purgeExpiredSessions, 60 * 60 * 1000);
 sessionCleanupInterval.unref();
 
-// Strict login schema
+// Dummy Argon2id hash for constant-time comparison to mitigate User Enumeration Timing Attacks
+const DUMMY_ARGON2_HASH =
+  '$argon2id$v=19$m=65536,t=3,p=4$ZHVtbXlzYWx0MTIzNDU2Nw$4eHkS59e5q6n2kH4rT8uW7mX9yZ0aB1cD2eF3gH4iJk';
+
+// Strict login schema with length bounds to prevent hash-bombing DoS
 const loginSchema = z.object({
   email: z
     .string()
     .trim()
     .email('Format email tidak valid')
+    .max(254, 'Email maksimal 254 karakter')
     .transform((val) => stripHtml(val).toLowerCase()),
-  password: z.string().min(1, 'Kata sandi wajib diisi'),
+  password: z.string().min(1, 'Kata sandi wajib diisi').max(128, 'Kata sandi maksimal 128 karakter'),
 });
 
 // Rate limit login: max 5 attempts per 15 minutes per IP + email (relaxed during test suite execution)
@@ -67,6 +72,8 @@ authRouter.post('/login', loginRateLimiter, zValidator('json', loginSchema), asy
   const user = db.select().from(users).where(eq(users.email, email)).get();
 
   if (!user || user.isActive !== 1) {
+    // Perform dummy Argon2id verification to guarantee constant-time execution
+    await verifyPassword(password, DUMMY_ARGON2_HASH);
     return c.json({ success: false, error: 'Email atau kata sandi tidak valid' }, 401);
   }
 
@@ -105,7 +112,7 @@ authRouter.post('/login', loginRateLimiter, zValidator('json', loginSchema), asy
   setCookie(c, 'nextcash_session', rawToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Lax',
+    sameSite: 'Strict',
     path: '/',
     maxAge: 7 * 24 * 60 * 60,
   });

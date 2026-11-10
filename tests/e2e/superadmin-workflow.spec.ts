@@ -6,7 +6,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await page.goto('/');
     await page.getByLabel('Alamat Email').fill('admin@nextcash.io');
     await page.getByLabel('Kata Sandi').fill('AdminPassword123!');
-    await page.getByRole('button', { name: 'Masuk ke Ledger' }).click();
+    await page.getByRole('button', { name: /Masuk/i }).click();
     await expect(page.locator('aside')).toContainText('Administrator Utama');
   });
 
@@ -19,7 +19,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await expect(page.getByRole('heading', { name: 'Konsol Administrasi' })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Pengguna/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Grup Keuangan/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Audit Global/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i })).toBeVisible();
   });
 
   test('SUPER_ADMIN can create a new system user via modal', async ({ page }) => {
@@ -56,8 +56,8 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await page.getByRole('button', { name: /Grup Keuangan/ }).click();
     await expect(page.locator('main')).toContainText('BELANJA SAFIR');
 
-    // Switch to Audit Global tab
-    await page.getByRole('button', { name: /Audit Global/ }).click();
+    // Switch to Riwayat Aktivitas tab
+    await page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i }).click();
     await expect(page.locator('table')).toBeVisible();
   });
 
@@ -68,7 +68,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
 
     // Verify Super Admin can add transactions
     await expect(page.getByRole('button', { name: 'Tambah Transaksi' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Import Excel' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Export .xlsx' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Impor Excel|Import Excel/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Unduh Excel|Export \.xlsx/i })).toBeVisible();
   });
 });

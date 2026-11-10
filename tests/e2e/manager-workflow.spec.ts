@@ -6,7 +6,7 @@ test.describe('E2E Stage 3: GROUP_MANAGER User Workflow (Anomaly Resolution & Gr
     await page.goto('/');
     await page.getByLabel('Alamat Email').fill('bendahara@safir.org');
     await page.getByLabel('Kata Sandi').fill('SafirPassword123!');
-    await page.getByRole('button', { name: 'Masuk ke Ledger' }).click();
+    await page.getByRole('button', { name: /Masuk/i }).click();
     await expect(page.locator('aside')).toContainText('Fathir Bendahara');
   });
 
@@ -71,12 +71,12 @@ test.describe('E2E Stage 3: GROUP_MANAGER User Workflow (Anomaly Resolution & Gr
 
   test('MANAGER can open Audit Trail drawer and inspect live log entries', async ({ page }) => {
     // Open Audit Trail drawer
-    await page.getByTitle('Buka Audit Trail & Aktivitas').click();
+    await page.getByTitle(/Riwayat Aktivitas/i).click();
 
-    // Verify drawer is open with heading "Riwayat & Audit Log"
+    // Verify drawer is open with heading "Riwayat Aktivitas & Log"
     const drawer = page.locator('.fixed.inset-y-0.right-0');
     await expect(drawer).toBeVisible();
-    await expect(drawer.getByRole('heading', { name: 'Riwayat & Audit Log' })).toBeVisible();
+    await expect(drawer.getByRole('heading', { name: /Riwayat/i })).toBeVisible();
 
     // Close drawer via xmark button
     await drawer.locator('button:has(i.fa-xmark)').click();

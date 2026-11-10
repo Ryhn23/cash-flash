@@ -48,7 +48,7 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="py-24 text-center text-slate-400">
         <i className="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-[#1E1B4B]" />
-        <p className="text-xs font-medium font-mono">Memuat telemetri keuangan {activeGroup.name}...</p>
+        <p className="text-xs font-medium font-sans">Memuat data keuangan {activeGroup.name}...</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export const DashboardPage: React.FC = () => {
             <div>
               <span className="font-bold">Selisih Rekonsiliasi Terdeteksi: </span>
               <span className="font-mono tabular-nums">
-                Ledger ({formatRupiah(kpis.sumFromLedger)}) &ne; Kategori ({formatRupiah(kpis.sumFromCategoryBreakdown)})
+                Total Kas ({formatRupiah(kpis.sumFromLedger)}) &ne; Total Rincian ({formatRupiah(kpis.sumFromCategoryBreakdown)})
               </span>
             </div>
           </div>

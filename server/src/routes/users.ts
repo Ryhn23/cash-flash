@@ -17,17 +17,17 @@ usersRouter.use('*', authMiddleware, requireSuperAdmin);
 
 // Schema for user creation
 const createUserSchema = z.object({
-  name: z.string().trim().min(2, 'Nama minimal 2 karakter').transform(stripHtml),
-  email: z.string().trim().email('Format email tidak valid').transform((val) => stripHtml(val).toLowerCase()),
-  password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
+  name: z.string().trim().min(2, 'Nama minimal 2 karakter').max(100, 'Nama maksimal 100 karakter').transform(stripHtml),
+  email: z.string().trim().email('Format email tidak valid').max(254, 'Email maksimal 254 karakter').transform((val) => stripHtml(val).toLowerCase()),
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter').max(128, 'Kata sandi maksimal 128 karakter'),
   systemRole: z.enum(['SUPER_ADMIN', 'USER']).default('USER'),
 });
 
 // Schema for user update
 const updateUserSchema = z.object({
-  name: z.string().trim().min(2, 'Nama minimal 2 karakter').transform(stripHtml).optional(),
-  email: z.string().trim().email('Format email tidak valid').transform((val) => stripHtml(val).toLowerCase()).optional(),
-  password: z.string().min(8, 'Kata sandi minimal 8 karakter').optional(),
+  name: z.string().trim().min(2, 'Nama minimal 2 karakter').max(100, 'Nama maksimal 100 karakter').transform(stripHtml).optional(),
+  email: z.string().trim().email('Format email tidak valid').max(254, 'Email maksimal 254 karakter').transform((val) => stripHtml(val).toLowerCase()).optional(),
+  password: z.string().min(8, 'Kata sandi minimal 8 karakter').max(128, 'Kata sandi maksimal 128 karakter').optional(),
   systemRole: z.enum(['SUPER_ADMIN', 'USER']).optional(),
   isActive: z.number().int().min(0).max(1).optional(),
 });
@@ -143,9 +143,17 @@ usersRouter.patch('/:userId', zValidator('json', updateUserSchema), async (c) =>
   }
   if (updates.password) {
     setValues.passwordHash = await hashPassword(updates.password);
+    // Invalidate all active sessions for this user on password change
+    db.delete(sessions).where(eq(sessions.userId, userId)).run();
   }
   if (updates.systemRole) setValues.systemRole = updates.systemRole;
-  if (updates.isActive !== undefined) setValues.isActive = updates.isActive;
+  if (updates.isActive !== undefined) {
+    setValues.isActive = updates.isActive;
+    // Invalidate all active sessions immediately if user is deactivated
+    if (updates.isActive === 0) {
+      db.delete(sessions).where(eq(sessions.userId, userId)).run();
+    }
+  }
 
   db.update(users).set(setValues).where(eq(users.id, userId)).run();
 
@@ -237,7 +245,6 @@ usersRouter.delete('/:userId', async (c) => {
 
     return c.json({ success: true, message: 'Pengguna berhasil dihapus' });
   } catch (err: any) {
-    console.error('[Next-Cash] Error deleting user:', err);
     return c.json({ success: false, error: err.message || 'Gagal menghapus pengguna dari database' }, 500);
   }
 });

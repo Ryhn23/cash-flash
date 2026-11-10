@@ -312,7 +312,6 @@ groupsRouter.delete('/:groupId', requireSuperAdmin, async (c) => {
 
     return c.json({ success: true, message: 'Grup keuangan beserta seluruh data terkait berhasil dihapus secara permanen' });
   } catch (err: any) {
-    console.error('[Next-Cash] Error deleting financial group:', err);
     return c.json({ success: false, error: err.message || 'Gagal menghapus grup keuangan' }, 500);
   }
 });

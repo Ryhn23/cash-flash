@@ -8,6 +8,7 @@ import { transactionsRouter } from '../../server/src/routes/transactions.js';
 import { excelRouter } from '../../server/src/routes/excel.js';
 import { analyticsRouter } from '../../server/src/routes/analytics.js';
 import { auditRouter } from '../../server/src/routes/audit.js';
+import { receiptsRouter } from '../../server/src/routes/receipts.js';
 import { db } from '../../server/src/db/index.js';
 import { users, sessions, financialGroups, groupMembers, groupCategories, transactions, auditLogs } from '../../server/src/db/schema.js';
 import { hashPassword, hashToken, generateSessionToken, generateCsrfToken } from '../../server/src/utils/security.js';
@@ -26,6 +27,7 @@ function createTestApp() {
   app.route('/api/groups', analyticsRouter);
   app.route('/api/groups', auditRouter);
   app.route('/api/audit', auditRouter);
+  app.route('/uploads', receiptsRouter);
   return app;
 }
 
@@ -254,6 +256,17 @@ test('Tahap 5: End-to-End API Routes QA Integration', async (t) => {
     const body = await res.json();
     assert.strictEqual(body.success, true);
     assert.ok(body.receiptPath.endsWith('.png'));
+
+    // Verify GET /uploads/:filename with authentication
+    const getResAuth = await app.request(`/uploads/${body.receiptPath}`, {
+      headers: { Cookie: sessionCookie },
+    });
+    assert.strictEqual(getResAuth.status, 200);
+    assert.strictEqual(getResAuth.headers.get('content-type'), 'image/png');
+
+    // Verify GET /uploads/:filename WITHOUT authentication is REJECTED (401)
+    const getResUnauth = await app.request(`/uploads/${body.receiptPath}`);
+    assert.strictEqual(getResUnauth.status, 401);
   });
 
   await t.test('GET /api/groups/:groupId/analytics - Telemetry & Reconciliation', async () => {

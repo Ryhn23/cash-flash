@@ -27,14 +27,14 @@ transactionsRouter.use('*', authMiddleware);
 const transactionInputSchema = z.object({
   txDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD'),
   type: z.enum(['EXPENSE', 'INCOME']).default('EXPENSE'),
-  description: z.string().trim().min(1, 'Uraian wajib diisi').transform(stripHtml),
+  description: z.string().trim().min(1, 'Uraian wajib diisi').max(500, 'Uraian maksimal 500 karakter').transform(stripHtml),
   categoryId: z.string().uuid().nullable().optional(),
-  quantity: z.number().positive('Jumlah harus lebih dari 0'),
-  unit: z.string().trim().min(1, 'Satuan wajib diisi').transform(stripHtml),
-  unitPrice: z.number().min(0, 'Harga satuan tidak boleh negatif').optional(),
-  totalPrice: z.number().int().min(0, 'Total harga tidak boleh negatif').optional(),
+  quantity: z.number().finite().positive('Jumlah harus lebih dari 0').max(1_000_000_000, 'Jumlah maksimal 1 milyar'),
+  unit: z.string().trim().min(1, 'Satuan wajib diisi').max(50, 'Satuan maksimal 50 karakter').transform(stripHtml),
+  unitPrice: z.number().finite().min(0, 'Harga satuan tidak boleh negatif').max(100_000_000_000_000, 'Harga satuan melebihi batas sistem').optional(),
+  totalPrice: z.number().int().finite().min(0, 'Total harga tidak boleh negatif').max(100_000_000_000_000, 'Total harga melebihi batas sistem').optional(),
   calcMode: z.enum(['FORWARD', 'REVERSE']).default('FORWARD'),
-  verificationNote: z.string().trim().transform(stripHtml).optional(),
+  verificationNote: z.string().trim().max(500, 'Catatan maksimal 500 karakter').transform(stripHtml).optional(),
 });
 
 // GET /api/groups/:groupId/transactions - List transactions with push-down SQL filters

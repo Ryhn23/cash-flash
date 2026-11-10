@@ -2,19 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('E2E Stage 2: EDITOR User Workflow (Ledger Operations & Dual-Calc)', () => {
   test.beforeEach(async ({ page }) => {
-    // Monitor console & network errors
-    page.on('console', (msg) => console.log('BROWSER CONSOLE:', msg.text()));
-    page.on('response', (res) => {
-      if (res.status() >= 400) {
-        console.log(`HTTP ${res.status()} ${res.url()}`);
-      }
-    });
-
     // Login as EDITOR
     await page.goto('/');
     await page.getByLabel('Alamat Email').fill('staf@safir.org');
     await page.getByLabel('Kata Sandi').fill('SafirPassword123!');
-    await page.getByRole('button', { name: 'Masuk ke Ledger' }).click();
+    await page.getByRole('button', { name: /Masuk/i }).click();
     await expect(page.locator('aside')).toContainText('Ahmad Staf Pencatat');
   });
 

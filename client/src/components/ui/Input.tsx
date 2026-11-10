@@ -22,16 +22,20 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+            <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center pointer-events-none text-slate-400">
               <i className={clsx(icon, 'text-xs')} />
             </div>
           )}
           <input
             id={inputId}
             ref={ref}
+            style={{
+              ...(icon ? { paddingLeft: '2.5rem' } : {}),
+              ...props.style,
+            }}
             className={clsx(
               'w-full input-base',
-              icon && 'pl-9',
+              icon && '!pl-10',
               error && 'border-[#BE123C] focus:border-[#BE123C] focus:ring-[#BE123C]/12',
               className
             )}
