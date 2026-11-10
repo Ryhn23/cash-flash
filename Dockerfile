@@ -17,7 +17,8 @@ FROM build-base AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
 
 # ==========================================
 # Stage 3: Production Dependencies (Pruned locally, 100% cached on code changes)
