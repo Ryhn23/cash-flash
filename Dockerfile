@@ -1,7 +1,5 @@
-# syntax=docker/dockerfile:1
-
 # ==========================================
-# Base Toolchain Stage (Cached once)
+# Stage 1: Base Toolchain (Cached)
 # ==========================================
 FROM node:22-bookworm-slim AS build-base
 WORKDIR /app
@@ -13,24 +11,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ==========================================
-# Stage 1: Production Dependencies (100% cached on code changes)
+# Stage 2: Install Dependencies (Runs ONCE, 0 duplicate downloads)
 # ==========================================
-FROM build-base AS prod-deps
+FROM build-base AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --no-audit --no-fund
+RUN npm ci --no-audit --no-fund
 
 # ==========================================
-# Stage 2: Build Frontend & Backend Bundles
+# Stage 3: Production Dependencies (Pruned locally, 100% cached on code changes)
 # ==========================================
-FROM build-base AS builder
+FROM deps AS prod-deps
 WORKDIR /app
+RUN npm prune --omit=dev
 
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund
+# ==========================================
+# Stage 4: Build Client & Server Bundles
+# ==========================================
+FROM deps AS builder
+WORKDIR /app
 
 COPY tsconfig.json vite.config.ts ./
 COPY client/ ./client/
@@ -39,7 +39,7 @@ COPY server/ ./server/
 RUN npm run build
 
 # ==========================================
-# Stage 3: Production Runtime (Ultra-Light)
+# Stage 5: Minimal Production Runtime
 # ==========================================
 FROM node:22-bookworm-slim AS runner
 WORKDIR /app
