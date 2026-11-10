@@ -19,7 +19,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await expect(page.getByRole('heading', { name: 'Konsol Administrasi' })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Pengguna/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Grup Keuangan/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i })).toBeVisible();
+    await expect(page.locator('main').getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i })).toBeVisible();
   });
 
   test('SUPER_ADMIN can create a new system user via modal', async ({ page }) => {
@@ -54,10 +54,20 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
 
     // Switch to Grup Keuangan tab
     await page.getByRole('button', { name: /Grup Keuangan/ }).click();
+
+    // If no group exists yet, create one
+    const createBtn = page.getByRole('button', { name: 'Buat Grup Baru' });
+    if (await createBtn.isVisible()) {
+      await createBtn.click();
+      await page.getByLabel('Nama Grup Keuangan').fill('BELANJA SAFIR');
+      await page.getByRole('button', { name: 'Buat Grup', exact: true }).click();
+      await page.waitForTimeout(500);
+    }
+
     await expect(page.locator('main')).toContainText('BELANJA SAFIR');
 
     // Switch to Riwayat Aktivitas tab
-    await page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i }).click();
+    await page.locator('main').getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i }).click();
     await expect(page.locator('table')).toBeVisible();
   });
 

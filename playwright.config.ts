@@ -10,7 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:3099',
+    baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     headless: true,
@@ -22,14 +22,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'tsx server/src/index.ts',
-    port: 3099,
-    timeout: 15000,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      NODE_ENV: 'test',
-      PORT: '3099',
-      AUTO_SEED: 'true',
-    },
+    command: 'node dist/server/index.js',
+    url: 'http://localhost:3001/api/health',
+    reuseExistingServer: true,
   },
 });

@@ -13,7 +13,7 @@ import {
   stripHtml,
 } from '../utils/security.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { rateLimit } from '../middleware/rate-limit.js';
+import { rateLimit, resetRateLimit } from '../middleware/rate-limit.js';
 import type { AppEnv } from '../types/env.js';
 
 export const authRouter = new Hono<AppEnv>();
@@ -47,10 +47,10 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Kata sandi wajib diisi').max(128, 'Kata sandi maksimal 128 karakter'),
 });
 
-// Rate limit login: max 5 attempts per 15 minutes per IP + email (relaxed during test suite execution)
+// Rate limit login: max 20 attempts per 15 minutes per IP + email (relaxed during test suite execution)
 const loginRateLimiter = rateLimit({
   storeName: 'login',
-  max: process.env.NODE_ENV === 'test' ? 1000 : 5,
+  max: process.env.NODE_ENV === 'test' ? 1000 : 20,
   windowMs: 15 * 60 * 1000,
   keyGenerator: async (c) => {
     const forwarded = c.req.header('x-forwarded-for');

@@ -65,3 +65,10 @@ export function rateLimit(options: {
     await next();
   };
 }
+
+export function resetRateLimit(storeName: string, key: string) {
+  const store = rateLimitStores.get(storeName);
+  if (store) {
+    store.delete(key);
+  }
+}

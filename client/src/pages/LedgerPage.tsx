@@ -9,6 +9,7 @@ import { DuplicateResolutionModal } from '../components/ledger/DuplicateResoluti
 import { ExcelImportModal } from '../components/ledger/ExcelImportModal.js';
 import { ReceiptModal } from '../components/ledger/ReceiptModal.js';
 import { SmartImportModal } from '../components/ledger/SmartImportModal.js';
+import { PageHeader } from '../components/layout/PageHeader.js';
 import { Button } from '../components/ui/Button.js';
 
 export const LedgerPage: React.FC = () => {
@@ -116,7 +117,19 @@ export const LedgerPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Standardized Page Header */}
+      <PageHeader
+        title="Buku Kas Belanja"
+        description="Pencatatan mutasi transaksi belanja, audit lampiran nota, dan resolusi anomali anggaran."
+        icon="fa-solid fa-table-list"
+        badge={
+          <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-700 rounded border border-slate-200">
+            {transactions.length} Transaksi
+          </span>
+        }
+      />
+
       {isLoadingTx ? (
         <div className="py-24 text-center text-slate-400">
           <i className="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-[#1E1B4B]" />

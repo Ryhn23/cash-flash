@@ -1,4 +1,5 @@
 import React, { useEffect, useState, Suspense } from 'react';
+import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from './store/useAppStore.js';
@@ -33,7 +34,7 @@ const ViewSuspenseFallback: React.FC = () => (
 );
 
 export const App: React.FC = () => {
-  const { user, setUser, setCsrfToken, activeTab, activeGroup } = useAppStore();
+  const { user, setUser, setCsrfToken, activeTab, activeGroup, isSidebarOpen, isImmersive } = useAppStore();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -95,15 +96,25 @@ export const App: React.FC = () => {
         anomalyCount={anomalyCount}
       />
 
-      {/* 2. Main Fluid Data Workspace: offset by sidebar */}
-      <div className="flex-1 flex flex-col min-w-0 md:pl-16 lg:pl-[260px] transition-all duration-150">
+      {/* 2. Main Fluid Data Workspace: dynamically offset by sidebar */}
+      <div
+        className={clsx(
+          'flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out',
+          isSidebarOpen ? 'md:pl-16 lg:pl-[260px]' : 'pl-0'
+        )}
+      >
         <TopHeader
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           reconciliationStatus={reconciliationStatus}
           remainingPercentage={remainingPercentage}
         />
 
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main
+          className={clsx(
+            'flex-1 w-full transition-all duration-200',
+            isImmersive ? 'max-w-none px-3 sm:px-6 py-4' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'
+          )}
+        >
           <Suspense fallback={<ViewSuspenseFallback />}>
             <AnimatePresence mode="wait">
               {activeTab === 'dashboard' && (
