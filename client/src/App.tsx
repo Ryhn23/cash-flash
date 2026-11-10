@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage.js';
 import { Sidebar } from './components/layout/Sidebar.js';
 import { TopHeader } from './components/layout/TopHeader.js';
 import type { AnalyticsReport } from './types/index.js';
+import clsx from 'clsx';
 
 // Lazy-loaded route views to optimize initial bundle size
 const DashboardPage = React.lazy(() =>
@@ -33,7 +34,15 @@ const ViewSuspenseFallback: React.FC = () => (
 );
 
 export const App: React.FC = () => {
-  const { user, setUser, setCsrfToken, activeTab, activeGroup } = useAppStore();
+  const {
+    user,
+    setUser,
+    setCsrfToken,
+    activeTab,
+    activeGroup,
+    isImmersiveMode,
+    isSidebarVisible,
+  } = useAppStore();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -95,15 +104,27 @@ export const App: React.FC = () => {
         anomalyCount={anomalyCount}
       />
 
-      {/* 2. Main Fluid Data Workspace: offset by sidebar */}
-      <div className="flex-1 flex flex-col min-w-0 md:pl-16 lg:pl-[260px] transition-all duration-150">
+      {/* 2. Main Fluid Data Workspace: offset by sidebar when visible */}
+      <div
+        className={clsx(
+          'flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out',
+          isSidebarVisible ? 'md:pl-16 lg:pl-[260px]' : 'pl-0'
+        )}
+      >
         <TopHeader
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           reconciliationStatus={reconciliationStatus}
           remainingPercentage={remainingPercentage}
         />
 
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main
+          className={clsx(
+            'flex-1 w-full py-6 transition-all duration-200',
+            isImmersiveMode
+              ? 'max-w-none px-4 sm:px-6 lg:px-8'
+              : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'
+          )}
+        >
           <Suspense fallback={<ViewSuspenseFallback />}>
             <AnimatePresence mode="wait">
               {activeTab === 'dashboard' && (

@@ -19,7 +19,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await expect(page.getByRole('heading', { name: 'Konsol Administrasi' })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Pengguna/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Grup Keuangan/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i })).toBeVisible();
+    await expect(page.getByRole('main').getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i })).toBeVisible();
   });
 
   test('SUPER_ADMIN can create a new system user via modal', async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe('E2E Stage 5: SUPER_ADMIN User Workflow (System Governance & Unive
     await expect(page.locator('main')).toContainText('BELANJA SAFIR');
 
     // Switch to Riwayat Aktivitas tab
-    await page.getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i }).click();
+    await page.getByRole('main').getByRole('button', { name: /Riwayat Aktivitas|Audit Global/i }).click();
     await expect(page.locator('table')).toBeVisible();
   });
 

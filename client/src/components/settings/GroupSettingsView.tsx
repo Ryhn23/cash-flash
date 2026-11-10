@@ -5,6 +5,7 @@ import { Button } from '../ui/Button.js';
 import { Input } from '../ui/Input.js';
 import { Select } from '../ui/Select.js';
 import { Modal } from '../ui/Modal.js';
+import { PageHeader } from '../layout/PageHeader.js';
 import { formatRupiah, parseRupiahInput } from '../../utils/format.js';
 import type { FinancialGroup, GroupMember, GroupCategory, User } from '../../types/index.js';
 
@@ -166,7 +167,19 @@ export const GroupSettingsView: React.FC<GroupSettingsViewProps> = ({ group, can
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Unified Page Header */}
+      <PageHeader
+        title="Pengaturan Grup Keuangan"
+        description={`Konfigurasi pagu anggaran, kategori belanja, satuan unit, dan daftar anggota untuk ${group.name}.`}
+        icon="fa-solid fa-sliders"
+        badge={
+          <span className="text-[11px] font-sans px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-[#3730A3] font-semibold">
+            {canManage ? 'Akses Pengelola' : 'Akses Terbatas'}
+          </span>
+        }
+      />
+
       {/* 1. Group General Settings */}
       <div className="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] no-gradient">
         <div className="border-b border-[#E2E8F0] pb-2.5 mb-4">
