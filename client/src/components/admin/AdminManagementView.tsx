@@ -5,7 +5,6 @@ import { Button } from '../ui/Button.js';
 import { Input } from '../ui/Input.js';
 import { Select } from '../ui/Select.js';
 import { Modal } from '../ui/Modal.js';
-import { PageHeader } from '../layout/PageHeader.js';
 import { formatRupiah, formatDateIndo, parseRupiahInput } from '../../utils/format.js';
 import type { User, FinancialGroup, AuditLogItem } from '../../types/index.js';
 import { useAppStore } from '../../store/useAppStore.js';
@@ -260,61 +259,51 @@ export const AdminManagementView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Standardized Page Header */}
-      <PageHeader
-        title="Konsol Administrasi"
-        description="Kelola akun pengguna sistem, setel ulang kata sandi, hak akses peran, dan kelola seluruh grup keuangan."
-        icon="fa-solid fa-shield-halved"
-        badge={
-          <span className="px-2 py-0.5 text-[11px] font-bold bg-amber-50 text-amber-800 rounded border border-amber-200">
-            SUPER_ADMIN
-          </span>
-        }
-        actions={
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setActiveAdminTab('users')}
-              className={clsx(
-                'px-3 py-1.5 rounded transition-all active:scale-[0.99] font-sans flex items-center gap-1.5',
-                activeAdminTab === 'users'
-                  ? 'bg-[#1E1B4B] text-white shadow-sm font-semibold'
-                  : 'text-slate-600 hover:text-slate-900'
-              )}
-            >
-              <i className="fa-solid fa-users text-xs" />
-              <span>Pengguna ({users.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveAdminTab('groups')}
-              className={clsx(
-                'px-3 py-1.5 rounded transition-all active:scale-[0.99] font-sans flex items-center gap-1.5',
-                activeAdminTab === 'groups'
-                  ? 'bg-[#1E1B4B] text-white shadow-sm font-semibold'
-                  : 'text-slate-600 hover:text-slate-900'
-              )}
-            >
-              <i className="fa-solid fa-layer-group text-xs" />
-              <span>Grup Keuangan ({groups.length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveAdminTab('audit')}
-              className={clsx(
-                'px-3 py-1.5 rounded transition-all active:scale-[0.99] font-sans flex items-center gap-1.5',
-                activeAdminTab === 'audit'
-                  ? 'bg-[#1E1B4B] text-white shadow-sm font-semibold'
-                  : 'text-slate-600 hover:text-slate-900'
-              )}
-            >
-              <i className="fa-solid fa-clock-rotate-left text-xs" />
-              <span>Riwayat Aktivitas</span>
-            </button>
-          </div>
-        }
-      />
+    <div className="space-y-6">
+      {/* Top Admin Bar */}
+      <div className="bg-[#1E1B4B] text-white p-4 rounded-xl border border-indigo-950 shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 no-gradient">
+        <div className="flex items-center gap-2.5">
+          <i className="fa-solid fa-shield-halved text-indigo-300 text-sm" />
+          <h2 className="text-base font-bold font-heading">Konsol Administrasi</h2>
+        </div>
+
+        {/* Tab Buttons */}
+        <div className="flex items-center bg-[#131037] p-1 rounded border border-[#2A265E] text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab('users')}
+            className={clsx(
+              'px-3 py-1.5 rounded transition-colors active:scale-[0.99] font-sans',
+              activeAdminTab === 'users' ? 'bg-white text-[#1E1B4B] shadow-none' : 'text-indigo-200 hover:text-white'
+            )}
+          >
+            <i className="fa-solid fa-users mr-1.5" />
+            Pengguna ({users.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab('groups')}
+            className={clsx(
+              'px-3 py-1.5 rounded transition-colors active:scale-[0.99] font-sans',
+              activeAdminTab === 'groups' ? 'bg-white text-[#1E1B4B] shadow-none' : 'text-indigo-200 hover:text-white'
+            )}
+          >
+            <i className="fa-solid fa-building-columns mr-1.5" />
+            Grup Keuangan ({groups.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveAdminTab('audit')}
+            className={clsx(
+              'px-3 py-1.5 rounded transition-colors active:scale-[0.99] font-sans',
+              activeAdminTab === 'audit' ? 'bg-white text-[#1E1B4B] shadow-none' : 'text-indigo-200 hover:text-white'
+            )}
+          >
+            <i className="fa-solid fa-clock-rotate-left mr-1.5" />
+            Riwayat Aktivitas
+          </button>
+        </div>
+      </div>
 
       {/* 1. USERS TAB */}
       {activeAdminTab === 'users' && (

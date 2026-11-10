@@ -5,7 +5,6 @@ import { useAppStore } from '../store/useAppStore.js';
 import type { AnalyticsReport } from '../types/index.js';
 import { KpiCards } from '../components/dashboard/KpiCards.js';
 import { CategoryBreakdownTable } from '../components/dashboard/CategoryBreakdownTable.js';
-import { PageHeader } from '../components/layout/PageHeader.js';
 import { Button } from '../components/ui/Button.js';
 import { formatRupiah } from '../utils/format.js';
 
@@ -59,37 +58,34 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Standardized Page Header */}
-      <PageHeader
-        title="Ringkasan Keuangan"
-        description="Pantau performa anggaran, realisasi belanja, dan indikator kesehatan kas grup."
-        icon="fa-solid fa-chart-pie"
-        badge={
-          <span className="px-2 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-700 rounded border border-slate-200">
-            {activeGroup.name}
-          </span>
-        }
-        actions={
-          <>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => refetch()}
-              icon="fa-solid fa-arrows-rotate"
-            >
-              Segarkan
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setActiveTab('ledger')}
-              icon="fa-solid fa-table-list"
-            >
-              Buka Buku Kas Belanja
-            </Button>
-          </>
-        }
-      />
+      {/* Header Toolbar */}
+      <div className="flex items-center justify-between pb-1">
+        <div>
+          <h2 className="text-sm sm:text-base font-semibold text-[#0F172A] tracking-tight font-heading">
+            Ringkasan Keuangan
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => refetch()}
+            icon="fa-solid fa-arrows-rotate"
+          >
+            Segarkan
+          </Button>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setActiveTab('ledger')}
+            icon="fa-solid fa-table-list"
+          >
+            Buka Buku Kas Belanja
+          </Button>
+        </div>
+      </div>
 
       {/* Discrepancy Alert only if Selisih exists */}
       {kpis && kpis.reconciliationStatus !== 'OK - Sama' && (

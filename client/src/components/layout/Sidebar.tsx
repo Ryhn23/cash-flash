@@ -11,7 +11,7 @@ export interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, anomalyCount = 0 }) => {
-  const { user, activeTab, setActiveTab, activeGroup, toggleActivityDrawer, logout, isSidebarOpen, toggleSidebar } = useAppStore();
+  const { user, activeTab, setActiveTab, activeGroup, toggleActivityDrawer, logout } = useAppStore();
 
   const handleLogout = async () => {
     try {
@@ -65,24 +65,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
           </div>
         </div>
 
-        {/* Desktop collapse button */}
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="hidden lg:flex p-1.5 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-100 transition-colors"
-          title="Sembunyikan Sidebar"
-          aria-label="Sembunyikan Sidebar"
-        >
-          <i className="fa-solid fa-chevron-left text-xs" />
-        </button>
-
         {/* Mobile close button */}
         <button
           type="button"
           onClick={onCloseMobile}
           className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded"
-          title="Tutup Menu"
-          aria-label="Tutup Menu"
         >
           <i className="fa-solid fa-xmark text-sm" />
         </button>
@@ -183,13 +170,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile, a
 
   return (
     <>
-      {/* Desktop Persistent Sidebar (260px) & Tablet Icon Rail (64px) with Show/Hide Transition */}
-      <aside
-        className={clsx(
-          'hidden md:block fixed inset-y-0 left-0 z-30 w-16 lg:w-[260px] transition-transform duration-200 ease-in-out',
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
+      {/* Desktop Persistent Sidebar (260px) & Tablet Icon Rail (64px) */}
+      <aside className="hidden md:block fixed inset-y-0 left-0 z-30 w-16 lg:w-[260px] transition-all duration-150">
         {sidebarContent}
       </aside>
 
